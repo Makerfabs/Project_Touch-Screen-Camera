@@ -91,6 +91,7 @@ void setup()
         vx += temp;
     }
     vx = vx / 3;
+    vx = 4095;
     temp = 0;
     for (i = 0; i < 3; i++)
     {
@@ -98,6 +99,7 @@ void setup()
         vy += temp;
     }
     vy = vy / 3;
+    vy = 4095;
 
     pinMode(TFT_CS, OUTPUT);
     SPI_OFF_TFT;
@@ -133,5 +135,5 @@ void loop()
     tft.drawPixel(x_addr,y_addr,ILI9488_RED);
     tft.fillRect(x_addr, y_addr, 5, 5, ILI9488_RED);
 
-    delay(100); // wait 5 seconds for next scan
+    //delay(100); // wait 5 seconds for next scan
 }
