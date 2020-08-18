@@ -137,5 +137,6 @@ def show_image_msg(filename):
 # print_hex_table(read_all_head(filename, 1280))
 # show_image_msg(filename)
 # print(show_image_msg(filename))
-print_hex_table(read_bytes("images/woof.bmp", show_image_msg("images/woof.bmp")))
-print_hex_table(read_bytes("images/red.bmp", show_image_msg("images/red.bmp")))
+for i in range(5):
+    filename = "images/" + str(i + 1) + ".bmp"
+    print_hex_table(read_bytes(filename, show_image_msg(filename)))

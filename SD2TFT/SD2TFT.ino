@@ -75,23 +75,24 @@ void setup()
     sd_test();
     SPI_OFF_SD;
 
+    Serial.println("SD init over.");
+
     //TFT(SPI) init
     SPI_ON_TFT;
     tft.begin();
-    tft.setRotation(2);
+    tft.setRotation(1);
     SPI_OFF_TFT;
+    Serial.println("TFT init over.");
 }
 
 void loop(void)
 {
-    print_img(SD, "/cat.bmp");
-    //sd_test();
+    for (int i = 0; i < file_num; i++)
+    {
+        print_img(SD, file_list[i]);
 
-    delay(1000);
-
-    print_img(SD, "/red.bmp");
-
-    delay(1000);
+        delay(1000);
+    }
 }
 
 void sd_test()
@@ -186,7 +187,7 @@ int read_img_msg(fs::FS &fs, const char *filename)
     return 0;
 }
 
-int print_img(fs::FS &fs, const char *filename)
+int print_img(fs::FS &fs, String filename)
 {
     SPI_ON_SD;
     File f = fs.open(filename);
@@ -198,8 +199,8 @@ int print_img(fs::FS &fs, const char *filename)
 
     // 从54偏移位置开始读
     f.seek(54);
-    #define X 320
-    #define Y 240
+    int X = 480;
+    int Y = 320;
     uint8_t RGB[3 * X];
     for (int row = 0; row < Y; row++)
     {
