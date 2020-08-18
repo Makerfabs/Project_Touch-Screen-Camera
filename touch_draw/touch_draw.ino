@@ -2,7 +2,19 @@
 #include "SPI.h"
 #include <Adafruit_GFX.h>
 #include "ILI9488.h"
+
+//#define NS2009_TOUCH
+#define FT6236_TOUCH
+
+#ifdef NS2009_TOUCH
 #include "NS2009.h"
+const int i2c_touch_addr = NS2009_ADDR;
+#endif
+
+#ifdef FT6236_TOUCH
+#include "FT6236.h"
+const int i2c_touch_addr = TOUCH_I2C_ADD;
+#endif
 
 //SPI
 #define SPI_MOSI 13
@@ -21,24 +33,6 @@
 
 #define ESP32_SDA 26
 #define ESP32_SCL 27
-
-//ft6236
-#define TOUCH_I2C_ADD 0x38
-
-#define TOUCH_REG_XL 0x04
-#define TOUCH_REG_XH 0x03
-#define TOUCH_REG_YL 0x06
-#define TOUCH_REG_YH 0x05
-
-#define NS2009_TOUCH
-//#define FT6236_TOUCH
-
-#ifdef NS2009_TOUCH
-const int i2c_touch_addr = NS2009_ADDR;
-#endif
-#ifdef FT6236_TOUCH
-const int i2c_touch_addr = TOUCH_I2C_ADD;
-#endif
 
 ILI9488 tft = ILI9488(TFT_CS, TFT_DC, TFT_RST);
 
@@ -85,11 +79,17 @@ void loop()
 {
 
     int pos[2] = {0, 0};
+#ifdef NS2009_TOUCH
     ns2009_pos(pos);
     if (filter(last_pos, pos, 18))
     {
         tft.fillRect(pos[0], pos[1], 3, 3, ILI9488_RED);
     }
+#endif
+#ifdef FT6236_TOUCH
+    ft6236_pos(pos);
+    tft.fillRect(pos[0], pos[1], 3, 3, ILI9488_RED);
+#endif
 }
 
 int filter(int last_pos[2], int pos[2], int level)
