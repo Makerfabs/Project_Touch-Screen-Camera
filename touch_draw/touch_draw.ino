@@ -3,6 +3,7 @@
 #include <Adafruit_GFX.h>
 #include "ILI9488.h"
 
+//Choice your touch IC
 //#define NS2009_TOUCH
 #define FT6236_TOUCH
 
