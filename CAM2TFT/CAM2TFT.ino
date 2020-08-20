@@ -1,37 +1,22 @@
 #include "SPI.h"
 #include "ILI9488.h"
 #include "esp_camera.h"
-
 #define CAMERA_MODEL_MAKERFABS
 #include "camera_pins.h"
 
+//SPI
 #define TFT_CS 15
 #define TFT_DC 33
 #define TFT_LED -1
 #define TFT_RST -1
-
-//SPI
 #define SPI_MOSI 13
 #define SPI_MISO 12
 #define SPI_SCK 14
 
-// If using the breakout, change pins as desired
-//ILI9488 tft = ILI9488(TFT_CS, TFT_DC, TFT_MOSI, TFT_CLK, TFT_RST, TFT_MISO);
 ILI9488 tft = ILI9488(TFT_CS, TFT_DC, TFT_RST);
-
-//unsigned short temp[153600];
-//unsigned short temp[76800];
-//unsigned short temp[100];
 
 void setup()
 {
-    Serial.begin(115200);
-    Serial.println("ILI9488 Test!");
-
-    SPI.begin(SPI_SCK, SPI_MISO, SPI_MOSI);
-
-    tft.begin();
-    tft.setRotation(2);
 
     //camera config
     camera_config_t config;
@@ -57,6 +42,7 @@ void setup()
 
     config.pixel_format = PIXFORMAT_RGB565;
     config.frame_size = FRAMESIZE_QVGA;
+    //config.frame_size = FRAMESIZE_HVGA;
     config.fb_count = 1;
 
     // camera init
@@ -75,23 +61,20 @@ void setup()
     {
         s->set_vflip(s, 1);       //flip it back
         s->set_brightness(s, 1);  //up the blightness just a bit
-        s->set_saturation(s, -2); //lower the saturation
+        s->set_saturation(s, -1); //lower the saturation
     }
     //drop down frame size for higher initial frame rate
     s->set_framesize(s, FRAMESIZE_QVGA);
 
 #if defined(CAMERA_MODEL_M5STACK_WIDE)
+    Serial.println("CAMERA_MODEL_M5STACK_WIDE");
     s->set_vflip(s, 1);
     s->set_hmirror(s, 1);
 #endif
-    tft.setRotation(2);
 }
 
 void loop(void)
 {
-    //tft.setRotation(r);
-    //tft.fillScreen(ILI9488_BLACK);
-
     camera_fb_t *fb = NULL;
 
     fb = esp_camera_fb_get();
@@ -100,14 +83,12 @@ void loop(void)
         Serial.println("Camera capture failed");
     }
     Serial.println(fb->len);
+    Serial.println(fb->width);
+    Serial.println(fb->height);
 
-    //tft.drawRGBBitmap(0, 0, (uint16_t *)fb->buf, fb->width, fb->height);
     drawRGBBitmap(fb->buf, fb->width, fb->height);
 
     esp_camera_fb_return(fb);
-    //tft.drawRGBBitmap(0, 0, (uint16_t *)viewBitmap, WIDTH, HEIGHT);
-
-    //delay(3000);
 }
 
 void drawRGBBitmap(uint8_t *bitmap, int16_t w, int16_t h)
@@ -118,9 +99,21 @@ void drawRGBBitmap(uint8_t *bitmap, int16_t w, int16_t h)
         for (int16_t i = 0; i < w; i++)
         {
             uint16_t temp = 0;
-            temp = bitmap[j * w * 2 + 2 * i] + bitmap[j * w * 2 + 2 * i + 1] << 8;
+            temp = bitmap[j * w * 2 + 2 * i] * 256 + bitmap[j * w * 2 + 2 * i + 1];
             tft.writePixel(i, j, temp);
         }
     }
     tft.endWrite();
+}
+
+void init()
+{
+    Serial.begin(115200);
+    Serial.println("ILI9488 Test!");
+
+    SPI.begin(SPI_SCK, SPI_MISO, SPI_MOSI);
+
+    tft.begin();
+    tft.setRotation(0);
+    tft.fillScreen(ILI9488_BLACK);
 }
