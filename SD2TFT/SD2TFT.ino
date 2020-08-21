@@ -66,12 +66,12 @@ void setup()
     SPI_OFF_SD;
     SPI_OFF_TFT;
     SPI.begin(SPI_SCK, SPI_MISO, SPI_MOSI);
-    SPISettings(60000000, MSBFIRST, SPI_MODE0);
-    SPI.setFrequency(60000000);
+    //SPISettings(60000000, MSBFIRST, SPI_MODE0);
+    //SPI.setFrequency(60000000);
 
     SPI_ON_SD;
     //SD(SPI) init
-    if (!SD.begin(SD_CS, SPI))
+    if (!SD.begin(SD_CS, SPI, 80000000))
     {
         Serial.println("Card Mount Failed");
         while (1)
@@ -96,12 +96,21 @@ void setup()
 
 void loop(void)
 {
-    
+    unsigned long start = micros();
     for (int i = 0; i < 5; i++)
     {
         //print_img(SD, file_list[i]);
         print_img(SD, img_file[i + 1]);
     }
+    Serial.println(micros() - start);
+    start = micros();
+    tft.fillScreen(ILI9488_BLACK);
+    tft.fillScreen(ILI9488_RED);
+    tft.fillScreen(ILI9488_GREEN);
+    tft.fillScreen(ILI9488_BLUE);
+    tft.fillScreen(ILI9488_BLACK);
+    Serial.println(micros() - start);
+    Serial.println("*********************");
 }
 
 void sd_test()

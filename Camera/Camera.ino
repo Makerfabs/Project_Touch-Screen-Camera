@@ -229,7 +229,7 @@ void esp32_init()
 
     //SD(SPI) init
     SPI_ON_SD;
-    if (!SD.begin(SD_CS, SPI))
+    if (!SD.begin(SD_CS, SPI, 80000000))
     {
         Serial.println("Card Mount Failed");
         while (1)
