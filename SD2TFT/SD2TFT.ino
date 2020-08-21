@@ -81,7 +81,7 @@ void setup()
     {
         Serial.println("Card Mount Successed");
     }
-    //sd_test();
+    sd_test();
     SPI_OFF_SD;
 
     Serial.println("SD init over.");
@@ -100,7 +100,7 @@ void loop(void)
     for (int i = 0; i < 5; i++)
     {
         //print_img(SD, file_list[i]);
-        print_img(SD, img_file[i + 1]);
+        print_img(SD, img_file[i]);
     }
     Serial.println(micros() - start);
     start = micros();

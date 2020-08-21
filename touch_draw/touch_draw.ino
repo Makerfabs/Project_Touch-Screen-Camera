@@ -4,8 +4,8 @@
 #include "ILI9488.h"
 
 //Choice your touch IC
-//#define NS2009_TOUCH
-#define FT6236_TOUCH
+#define NS2009_TOUCH
+//#define FT6236_TOUCH
 
 #ifdef NS2009_TOUCH
 #include "NS2009.h"
