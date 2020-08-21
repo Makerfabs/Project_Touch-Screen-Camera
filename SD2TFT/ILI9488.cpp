@@ -39,7 +39,7 @@ static inline void spi_begin(void) __attribute__((always_inline));
 static inline void spi_begin(void) {
 #if defined (ARDUINO_ARCH_ARC32)
   // max speed!
-  SPI.beginTransaction(SPISettings(16000000, MSBFIRST, SPI_MODE0));
+  SPI.beginTransaction(SPISettings(60000000, MSBFIRST, SPI_MODE0));
 #else
     // max speed!
   SPI.beginTransaction(SPISettings(24000000, MSBFIRST, SPI_MODE0));

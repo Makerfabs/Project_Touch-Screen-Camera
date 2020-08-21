@@ -6,6 +6,8 @@
 #define CAMERA_MODEL_MAKERFABS
 #include "camera_pins.h"
 
+//#define SERIAL_DEBUG
+
 #define ARRAY_LENGTH 320 * 240 * 3
 
 //Choice your touch IC
@@ -67,16 +69,41 @@ void setup()
 
 void loop()
 {
+#ifdef SERIAL_DEBUG
+    unsigned long start = micros();
+#endif
+
     camera_fb_t *fb = NULL;
-    void *ptrVal = NULL;
+
     fb = esp_camera_fb_get();
-    ptrVal = heap_caps_malloc(ARRAY_LENGTH, MALLOC_CAP_SPIRAM);
-    uint8_t *rgb = (uint8_t *)ptrVal;
 
     if (stream_flag == 1)
     {
-        fmt2rgb888(fb->buf, fb->len, PIXFORMAT_RGB565, rgb);
-        print_RGB888_img(rgb);
+#ifdef SERIAL_DEBUG
+        Serial.println(micros() - start);
+#endif
+        //显示rgb888图像，rgb需要转码，用于读sd卡的24位真彩色bmp
+        //print_RGB888_img(rgb);
+
+        //将转化放到psram执行，速度没有改善，画质反而更差了
+        /*
+        void *ptrVal = NULL;
+        ptrVal = heap_caps_malloc(153600, MALLOC_CAP_SPIRAM);
+        uint16_t *u16bitmap = (uint16_t *)ptrVal;
+        RGB_u8_u16(fb->buf, u16bitmap);
+        //drawRGB16Bitmap(u16bitmap, fb->width, fb->height);
+        tft.drawRGBBitmap(0, 0, u16bitmap, 320, 240);
+        heap_caps_free(ptrVal);
+        u16bitmap = NULL;
+        */
+
+        //显示rgb565图像
+        drawRGBBitmap(fb->buf, fb->width, fb->height);
+
+        //draw_fast_pic(fb->buf, fb->width, fb->height);
+#ifdef SERIAL_DEBUG
+        Serial.println(micros() - start);
+#endif
     }
 
 #ifdef NS2009_TOUCH
@@ -86,18 +113,37 @@ void loop()
     ft6236_pos(pos);
 #endif
     String pos_str = (String)pos[0] + "," + (String)pos[1];
+#ifdef SERIAL_DEBUG
     Serial.println(pos_str);
+#endif
+
     if (pos[0] < 100)
     {
         if (pos[1] < 340 && pos[1] > 240)
         {
             if (stream_flag == 1)
             {
+
+#ifdef SERIAL_DEBUG
                 Serial.println("Take a photo");
+#endif
+
+                void *ptrVal = NULL;
+                ptrVal = heap_caps_malloc(ARRAY_LENGTH, MALLOC_CAP_SPIRAM);
+                uint8_t *rgb = (uint8_t *)ptrVal;
+                fmt2rgb888(fb->buf, fb->len, PIXFORMAT_RGB565, rgb);
                 save_image(SD, rgb);
+                heap_caps_free(ptrVal);
+                rgb = NULL;
+                show_log(0);
             }
-            else{
+            else
+            {
+
+#ifdef SERIAL_DEBUG
                 Serial.println("Please start steam");
+#endif
+                show_log(3);
             }
         }
     }
@@ -106,9 +152,13 @@ void loop()
     {
         if (pos[1] < 340 && pos[1] > 240)
         {
+#ifdef SERIAL_DEBUG
             Serial.println("Last photo:");
             Serial.println(imgname);
+#endif
+            show_log(1);
             stream_flag = 0;
+            tft.fillRect(0, 0, 320, 240, ILI9488_BLACK);
             print_img(SD, imgname);
         }
     }
@@ -117,14 +167,32 @@ void loop()
     {
         if (pos[1] < 340 && pos[1] > 240)
         {
+#ifdef SERIAL_DEBUG
             Serial.println("START STREAM");
+#endif
             stream_flag = 1;
+            show_log(2);
+        }
+    }
+
+    if (pos[0] < 320 && pos[0] > 220)
+    {
+        if (pos[1] < 480 && pos[1] > 440)
+        {
+#ifdef SERIAL_DEBUG
+            Serial.println("START STREAM");
+#endif
+            stream_flag = 0;
+            testFillScreen();
         }
     }
 
     esp_camera_fb_return(fb);
-    heap_caps_free(ptrVal);
-    rgb = NULL;
+
+#ifdef SERIAL_DEBUG
+    Serial.println(micros() - start);
+    Serial.println("over a circle");
+#endif
 }
 
 void esp32_init()
@@ -171,7 +239,7 @@ void esp32_init()
     {
         Serial.println("Card Mount Successed");
     }
-    sd_test();
+    //sd_test();
     SPI_OFF_SD;
 
     Serial.println("SD init over.");
@@ -212,6 +280,7 @@ void camera_init()
 
     config.pixel_format = PIXFORMAT_RGB565;
     config.frame_size = FRAMESIZE_QVGA;
+    config.jpeg_quality = 10;
     config.fb_count = 1;
 
     // camera init
@@ -233,6 +302,8 @@ void camera_init()
     }
     //drop down frame size for higher initial frame rate
     s->set_framesize(s, FRAMESIZE_QVGA);
+
+    show_log(2);
 }
 
 void print_RGB888_img(uint8_t *rgb)
@@ -307,8 +378,9 @@ int save_image(fs::FS &fs, uint8_t *rgb)
     SPI_ON_SD;
     imgname = "/" + String(img_index) + "write.bmp";
     img_index++;
+
     Serial.println("Image name：" + imgname);
-    //String imgname = "writetest.bmp";
+
     File f = fs.open(imgname, "w");
     if (!f)
     {
@@ -330,6 +402,7 @@ void draw_button()
     tft.fillRect(0, 240, 100, 100, ILI9488_BLUE);
     tft.fillRect(110, 240, 100, 100, ILI9488_BLUE);
     tft.fillRect(220, 240, 100, 100, ILI9488_BLUE);
+    tft.fillRect(220, 440, 100, 40, ILI9488_GREEN);
 
     tft.setTextColor(ILI9488_WHITE);
     tft.setTextSize(1);
@@ -337,8 +410,12 @@ void draw_button()
     tft.println("TAKE PHOTO");
     tft.setCursor(120, 290);
     tft.println("LAST PHOTO");
-    tft.setCursor(220, 290);
+    tft.setCursor(230, 290);
     tft.println("START STREAM");
+    tft.setCursor(230, 450);
+    tft.println("TEST");
+
+    SPI_OFF_TFT;
 }
 
 int print_img(fs::FS &fs, String filename)
@@ -373,4 +450,107 @@ int print_img(fs::FS &fs, String filename)
     f.close();
     SPI_OFF_SD;
     return 0;
+}
+
+void show_log(int cmd_type)
+{
+    SPI_ON_TFT;
+    tft.fillRect(0, 340, 220, 140, ILI9488_BLACK);
+
+    tft.setTextColor(ILI9488_RED);
+    tft.setTextSize(2);
+    tft.setCursor(0, 360);
+
+    switch (cmd_type)
+    {
+    case 0:
+        tft.println("TAKE PHOTO");
+        tft.println(imgname);
+        break;
+
+    case 1:
+        tft.println("Show las photo");
+        tft.println(imgname);
+        break;
+
+    case 2:
+        tft.println("STREAMING");
+        break;
+
+    case 3:
+        tft.println("NEED STREAM");
+        break;
+
+    default:
+        break;
+    }
+    SPI_OFF_TFT;
+}
+
+void drawRGBBitmap(uint8_t *bitmap, int16_t w, int16_t h)
+{
+    SPI_ON_TFT;
+    tft.startWrite();
+    for (int16_t j = 0; j < h; j++)
+    {
+        for (int16_t i = 0; i < w; i++)
+        {
+            uint16_t temp = bitmap[j * w * 2 + 2 * i] * 256 + bitmap[j * w * 2 + 2 * i + 1];
+            tft.writePixel(i, j, temp);
+        }
+    }
+    tft.endWrite();
+    SPI_OFF_TFT;
+}
+
+void drawRGB16Bitmap(uint16_t *bitmap, int16_t w, int16_t h)
+{
+    tft.startWrite();
+    for (int16_t j = 0; j < h; j++)
+    {
+        for (int16_t i = 0; i < w; i++)
+        {
+            tft.writePixel(i, j, bitmap[j * w + i]);
+        }
+    }
+    tft.endWrite();
+}
+
+void RGB_u8_u16(uint8_t *src, uint16_t *out)
+{
+    for (long i = 0; i < 76800; i++)
+    {
+        out[i] = src[2 * i] * 256 + src[2 * i + 1];
+    }
+}
+
+void draw_fast_pic(uint8_t *bitmap, int16_t w, int16_t h)
+{
+    tft.startWrite();
+    for (int16_t j = 0; j < h; j += 2)
+    {
+        for (int16_t i = 0; i < w; i += 2)
+        {
+            uint16_t temp = bitmap[j * w * 2 + 2 * i] * 256 + bitmap[j * w * 2 + 2 * i + 1];
+            tft.writePixel(i, j, temp);
+        }
+    }
+    tft.endWrite();
+}
+
+unsigned long testFillScreen()
+{
+    SPI_ON_TFT;
+    unsigned long start = micros();
+    tft.fillRect(0, 0, 320, 240, ILI9488_YELLOW);
+    tft.fillRect(0, 0, 320, 240, ILI9488_RED);
+    tft.fillRect(0, 0, 320, 240, ILI9488_GREEN);
+    tft.fillRect(0, 0, 320, 240, ILI9488_BLUE);
+    tft.fillRect(0, 0, 320, 240, ILI9488_BLACK);
+    start = micros() - start;
+    tft.fillRect(0, 340, 220, 140, ILI9488_BLACK);
+    tft.setCursor(0, 360);
+    tft.println("cost:" + (String)start);
+    return micros() - start;
+    SPI_OFF_TFT;
 }

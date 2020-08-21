@@ -48,6 +48,13 @@ ILI9488 tft = ILI9488(TFT_CS, TFT_DC, TFT_RST);
 
 String file_list[20];
 int file_num = 0;
+String img_file[5] =
+    {
+        "/1.bmp",
+        "/2.bmp",
+        "/3.bmp",
+        "/4.bmp",
+        "/5.bmp"};
 
 void setup()
 {
@@ -59,6 +66,8 @@ void setup()
     SPI_OFF_SD;
     SPI_OFF_TFT;
     SPI.begin(SPI_SCK, SPI_MISO, SPI_MOSI);
+    SPISettings(60000000, MSBFIRST, SPI_MODE0);
+    SPI.setFrequency(60000000);
 
     SPI_ON_SD;
     //SD(SPI) init
@@ -72,7 +81,7 @@ void setup()
     {
         Serial.println("Card Mount Successed");
     }
-    sd_test();
+    //sd_test();
     SPI_OFF_SD;
 
     Serial.println("SD init over.");
@@ -87,11 +96,11 @@ void setup()
 
 void loop(void)
 {
-    for (int i = 0; i < file_num; i++)
+    
+    for (int i = 0; i < 5; i++)
     {
-        print_img(SD, file_list[i]);
-
-        delay(1000);
+        //print_img(SD, file_list[i]);
+        print_img(SD, img_file[i + 1]);
     }
 }
 
