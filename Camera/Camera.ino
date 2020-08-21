@@ -128,6 +128,7 @@ void loop()
                 Serial.println("Take a photo");
 #endif
 
+                show_log(0);
                 void *ptrVal = NULL;
                 ptrVal = heap_caps_malloc(ARRAY_LENGTH, MALLOC_CAP_SPIRAM);
                 uint8_t *rgb = (uint8_t *)ptrVal;
@@ -135,7 +136,6 @@ void loop()
                 save_image(SD, rgb);
                 heap_caps_free(ptrVal);
                 rgb = NULL;
-                show_log(0);
             }
             else
             {
