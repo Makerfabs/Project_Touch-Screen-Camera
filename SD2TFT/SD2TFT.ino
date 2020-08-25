@@ -81,7 +81,7 @@ void setup()
     {
         Serial.println("Card Mount Successed");
     }
-    sd_test();
+    //sd_test();
     SPI_OFF_SD;
 
     Serial.println("SD init over.");

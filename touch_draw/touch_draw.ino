@@ -4,8 +4,8 @@
 #include "ILI9488.h"
 
 //Choice your touch IC
-#define NS2009_TOUCH
-//#define FT6236_TOUCH
+//#define NS2009_TOUCH
+#define FT6236_TOUCH
 
 #ifdef NS2009_TOUCH
 #include "NS2009.h"
@@ -38,6 +38,7 @@ const int i2c_touch_addr = TOUCH_I2C_ADD;
 ILI9488 tft = ILI9488(TFT_CS, TFT_DC, TFT_RST);
 
 int last_pos[2] = {0, 0};
+int draw_color = ILI9488_WHITE;
 
 void setup()
 {
@@ -72,7 +73,11 @@ void setup()
     //TFT(SPI) init
     SPI_ON_TFT;
     tft.begin();
-    tft.fillScreen(ILI9488_BLUE);
+    tft.fillScreen(ILI9488_BLACK);
+    tft.fillRect(0, 0, 80, 40, ILI9488_RED);
+    tft.fillRect(80, 0, 80, 40, ILI9488_GREEN);
+    tft.fillRect(160, 0, 80, 40, ILI9488_BLUE);
+    tft.fillRect(240, 0, 80, 40, ILI9488_YELLOW);
     SPI_OFF_TFT;
 }
 
@@ -89,7 +94,28 @@ void loop()
 #endif
 #ifdef FT6236_TOUCH
     ft6236_pos(pos);
-    tft.fillRect(pos[0], pos[1], 3, 3, ILI9488_RED);
+    if (0 < pos[1] && pos[1] < 40)
+    {
+        if (0 < pos[0] && pos[0] < 80)
+        {
+            draw_color = ILI9488_RED;
+        }
+        else if (80 < pos[0] && pos[0] < 160)
+        {
+            draw_color = ILI9488_GREEN;
+        }
+
+        else if (160 < pos[0] && pos[0] < 240)
+        {
+            draw_color = ILI9488_BLUE;
+        }
+        else if (240 < pos[0] && pos[0] < 320)
+        {
+            draw_color = ILI9488_YELLOW;
+        }
+    }
+    else
+        tft.fillRect(pos[0], pos[1], 3, 3, draw_color);
 #endif
 }
 

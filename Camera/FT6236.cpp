@@ -14,12 +14,28 @@ int readTouchReg(int reg)
     return data;
 }
 
+/*
 int getTouchPointX()
 {
     int XL = 0;
     int XH = 0;
 
     XH = readTouchReg(TOUCH_REG_XH);
+    XL = readTouchReg(TOUCH_REG_XL);
+
+    return ((XH & 0x0F) << 8) | XL;
+}
+*/
+
+int getTouchPointX()
+{
+    int XL = 0;
+    int XH = 0;
+
+    XH = readTouchReg(TOUCH_REG_XH);
+    //Serial.println(XH >> 6,HEX);
+    if(XH >> 6 == 1)
+        return -1;
     XL = readTouchReg(TOUCH_REG_XL);
 
     return ((XH & 0x0F) << 8) | XL;
@@ -44,6 +60,12 @@ void ft6236_pos(int pos[2])
     int YH = 0;
 
     XH = readTouchReg(TOUCH_REG_XH);
+    if(XH >> 6 == 1)
+    {
+        pos[0] = -1;
+        pos[1] = -1;
+        return;
+    }
     XL = readTouchReg(TOUCH_REG_XL);
     YH = readTouchReg(TOUCH_REG_YH);
     YL = readTouchReg(TOUCH_REG_YL);

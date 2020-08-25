@@ -30,6 +30,9 @@ int getTouchPointX()
     int XH = 0;
 
     XH = readTouchReg(TOUCH_REG_XH);
+    //Serial.println(XH >> 6,HEX);
+    if(XH >> 6 == 1)
+        return -1;
     XL = readTouchReg(TOUCH_REG_XL);
 
     return ((XH & 0x0F) << 8) | XL;

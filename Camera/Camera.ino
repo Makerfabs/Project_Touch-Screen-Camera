@@ -117,9 +117,9 @@ void loop()
     Serial.println(pos_str);
 #endif
 
-    if (pos[0] < 100)
+    if (0 < pos[0] && pos[0] < 100)
     {
-        if (pos[1] < 340 && pos[1] > 240)
+        if (240 < pos[1] && pos[1] < 340)
         {
             if (stream_flag == 1)
             {
@@ -128,12 +128,12 @@ void loop()
                 Serial.println("Take a photo");
 #endif
 
-                show_log(0);
                 void *ptrVal = NULL;
                 ptrVal = heap_caps_malloc(ARRAY_LENGTH, MALLOC_CAP_SPIRAM);
                 uint8_t *rgb = (uint8_t *)ptrVal;
                 fmt2rgb888(fb->buf, fb->len, PIXFORMAT_RGB565, rgb);
                 save_image(SD, rgb);
+                show_log(0);
                 heap_caps_free(ptrVal);
                 rgb = NULL;
             }
