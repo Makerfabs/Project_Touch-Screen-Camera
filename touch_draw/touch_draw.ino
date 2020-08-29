@@ -4,8 +4,8 @@
 #include "ILI9488.h"
 
 //Choice your touch IC
-//#define NS2009_TOUCH
-#define FT6236_TOUCH
+#define NS2009_TOUCH
+//#define FT6236_TOUCH
 
 #ifdef NS2009_TOUCH
 #include "NS2009.h"
@@ -94,6 +94,7 @@ void loop()
 #endif
 #ifdef FT6236_TOUCH
     ft6236_pos(pos);
+#endif
     if (0 < pos[1] && pos[1] < 40)
     {
         if (0 < pos[0] && pos[0] < 80)
@@ -116,7 +117,6 @@ void loop()
     }
     else
         tft.fillRect(pos[0], pos[1], 3, 3, draw_color);
-#endif
 }
 
 int filter(int last_pos[2], int pos[2], int level)
