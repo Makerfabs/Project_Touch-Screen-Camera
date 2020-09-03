@@ -2,10 +2,11 @@
 
 ```c++
 /*
-Version:		V1.0
+Version:		V2.0
 Author:			Vincent
 Create Date:	2020/8/19
 Note:
+	V2.0:Change ILI9488 driver,use LovyanGFX lib.Ten times faster than before!!!
 	
 */
 ```
