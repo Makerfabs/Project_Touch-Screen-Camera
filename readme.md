@@ -167,6 +167,20 @@ Loop back the images in the SD card.
 
 ![SD2TFT](md_pic/SD2TFT.jpg)
 
+### Receive WiFi Video
+Change from [MakePython ESP32 Color LCD で 動画をWiFi受信](https://homemadegarbage.com/makerfabs05)
+
+- Upload file : "/Project_Touch-Screen-Camra/ESP32_ScreenShotReceiver-master/ScreenShotReceiver/ScreenShotReceiver.ino"
+- Open "/Project_Touch-Screen-Camra/ESP32_ScreenShotReceiver-master/ScreenShotSender.exe"
+- Input IP on the screen.
+- Push connect.
+
+![wifiscreen](md_pic/wifi_screen.jpg)
+
+
+
+
+
 ## Touch Screen
 
 ### NS2009
