@@ -38,7 +38,7 @@ The realization of a simple digital camera, you can take pictures through the ca
 
 ## ~~Product link ：~~[ ~~ESP32 Touch Camera~~]() 
 
-The ESP32 Touch Camera USES the ILI9488 screen, which comes with resistive and capacitive screens.And an OV2640 camera and SD card slot.It can be used as a webcam, an electronic album, or a digital camera.Support for Arduino and MicroPython.This project
+The ESP32 Touch Camera use ILI9488 screen, which comes with resistive or capacitive screens. Hava an OV2640 camera and SD card slot. It can be used as a webcam, an electronic album, or a digital camera. Support for Arduino and MicroPython. 
 
 ## Feature
 
@@ -49,9 +49,7 @@ The ESP32 Touch Camera USES the ILI9488 screen, which comes with resistive and c
 - LCD 3.5 inch Amorphous-TFT-LCD (Thin Film Transistor Liquid Crystal Display) for mobile-phone or handy electrical equipments.
 - NS2009 is A 4-wire resistive touch screen control circuit with I2C interface, which contains A 12-bit resolution A/D converter.
 
-- The FT6X36 Series ICs are single-chip capacitive touch panel controller IC with a built-in 16 bit enhanced Micro-controller unit
-
-(MCU).
+- The FT6X36 Series ICs are single-chip capacitive touch panel controller IC with a built-in 16 bit enhanced Micro-controller unit (MCU).
 
 
 

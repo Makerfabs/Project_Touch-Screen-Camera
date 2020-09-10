@@ -455,7 +455,7 @@ int print_img(fs::FS &fs, String filename)
         SPI_ON_TFT;
         for (int col = 0; col < X; col++)
         {
-            tft.drawPixel(col, row, tft.color565(RGB[col * 3 + 2], RGB[col * 3] + 1, RGB[col * 3]));
+            tft.drawPixel(col, row, tft.color565(RGB[col * 3 + 2], RGB[col * 3  + 1], RGB[col * 3]));
         }
         SPI_OFF_TFT;
         SPI_ON_SD;
