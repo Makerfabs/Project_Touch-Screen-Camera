@@ -8,7 +8,8 @@
 #include <LovyanGFX.hpp>
 #include "makerfabs_pin.h"
 
-#define SERIAL_DEBUG
+//If undefine debug, will be faster
+//#define SERIAL_DEBUG
 
 #define ARRAY_LENGTH 320 * 240 * 3
 
@@ -16,8 +17,8 @@
 #define ESP32_SDA 26
 #define ESP32_SCL 27
 
-#define NS2009_TOUCH
-//#define FT6236_TOUCH
+//#define NS2009_TOUCH //Resistive screen driver
+#define FT6236_TOUCH      //Capacitive screen driver
 
 #ifdef NS2009_TOUCH
 #include "NS2009.h"
@@ -66,8 +67,6 @@ const uint8_t img_rgb888_320_240_head[54] = {
     0x0, 0x0, 0x0, 0x84, 0x3, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
     0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
 
-String file_list[20];
-int file_num = 0;
 String imgname = "";
 int img_index = 0;
 int pos[2] = {0, 0};
@@ -95,25 +94,9 @@ void loop()
 #ifdef SERIAL_DEBUG
         Serial.println(micros() - start);
 #endif
-        //显示rgb888图像，rgb需要转码，用于读sd卡的24位真彩色bmp
-        //print_RGB888_img(rgb);
-
-        //将转化放到psram执行，速度没有改善，画质反而更差了
-        /*
-        void *ptrVal = NULL;
-        ptrVal = heap_caps_malloc(153600, MALLOC_CAP_SPIRAM);
-        uint16_t *u16bitmap = (uint16_t *)ptrVal;
-        RGB_u8_u16(fb->buf, u16bitmap);
-        //drawRGB16Bitmap(u16bitmap, fb->width, fb->height);
-        tft.drawRGBBitmap(0, 0, u16bitmap, 320, 240);
-        heap_caps_free(ptrVal);
-        u16bitmap = NULL;
-        */
-
-        //显示rgb565图像
+        //Display rgb565 picture
         drawRGBBitmap(fb->buf, fb->width, fb->height);
 
-        //draw_fast_pic(fb->buf, fb->width, fb->height);
 #ifdef SERIAL_DEBUG
         Serial.println(micros() - start);
 #endif
@@ -209,6 +192,7 @@ void loop()
 #endif
 }
 
+//ILI9488 init and SD card init
 void esp32_init()
 {
     Serial.begin(115200);
@@ -253,7 +237,6 @@ void esp32_init()
     {
         Serial.println("Card Mount Successed");
     }
-    //sd_test();
     SPI_OFF_SD;
 
     Serial.println("SD init over.");
@@ -269,6 +252,7 @@ void esp32_init()
     Serial.println("TFT init over.");
 }
 
+//Camera setting
 void camera_init()
 {
     //camera config
@@ -311,7 +295,7 @@ void camera_init()
     //initial sensors are flipped vertically and colors are a bit saturated
     if (s->id.PID == OV2640_PID)
     {
-        s->set_vflip(s, 1);      //flip it back
+        s->set_vflip(s, 0);      //flip it back
         s->set_brightness(s, 0); //up the blightness just a bit
         s->set_saturation(s, 1); //lower the saturation
     }
@@ -321,73 +305,7 @@ void camera_init()
     show_log(2);
 }
 
-void print_RGB888_img(uint8_t *rgb)
-{
-    SPI_ON_TFT;
-    int X = 320;
-    int Y = 240;
-    for (int row = 0; row < Y; row++)
-    {
-        for (int col = 0; col < X; col++)
-        {
-            tft.drawPixel(col, row, tft.color565(rgb[320 * 3 * row + col * 3 + 2], rgb[320 * 3 * row + col * 3] + 1, rgb[320 * 3 * row + col * 3]));
-        }
-    }
-    SPI_OFF_TFT;
-}
-
-void sd_test()
-{
-    SPI_ON_SD;
-    //Read SD
-    file_num = get_file_list(SD, "/", 0, file_list);
-    Serial.print("File count:");
-    Serial.println(file_num);
-    Serial.println("All File:");
-    for (int i = 0; i < file_num; i++)
-    {
-        Serial.println(file_list[i]);
-    }
-
-    Serial.println("SD Test!");
-    SPI_OFF_SD;
-}
-
-int get_file_list(fs::FS &fs, const char *dirname, uint8_t levels, String filelist[30])
-{
-    Serial.printf("Listing directory: %s\n", dirname);
-    int i = 0;
-
-    File root = fs.open(dirname);
-    if (!root)
-    {
-        Serial.println("Failed to open directory");
-        return i;
-    }
-    if (!root.isDirectory())
-    {
-        Serial.println("Not a directory");
-        return i;
-    }
-
-    File file = root.openNextFile();
-    while (file)
-    {
-        if (file.isDirectory())
-        {
-        }
-        else
-        {
-            String temp = file.name();
-
-            filelist[i] = temp;
-            i++;
-        }
-        file = root.openNextFile();
-    }
-    return i;
-}
-
+//Save image to SD card
 int save_image(fs::FS &fs, uint8_t *rgb)
 {
     SPI_ON_SD;
@@ -433,6 +351,7 @@ void draw_button()
     SPI_OFF_TFT;
 }
 
+//Display image from file
 int print_img(fs::FS &fs, String filename)
 {
     SPI_ON_SD;
@@ -443,7 +362,6 @@ int print_img(fs::FS &fs, String filename)
         return 0;
     }
 
-    // 从54偏移位置开始读
     f.seek(54);
     int X = 320;
     int Y = 240;
@@ -516,41 +434,6 @@ void drawRGBBitmap(uint8_t *bitmap, int16_t w, int16_t h)
     }
     tft.endWrite();
     SPI_OFF_TFT;
-}
-
-void drawRGB16Bitmap(uint16_t *bitmap, int16_t w, int16_t h)
-{
-    tft.startWrite();
-    for (int16_t j = 0; j < h; j++)
-    {
-        for (int16_t i = 0; i < w; i++)
-        {
-            tft.writePixel(i, j, bitmap[j * w + i]);
-        }
-    }
-    tft.endWrite();
-}
-
-void RGB_u8_u16(uint8_t *src, uint16_t *out)
-{
-    for (long i = 0; i < 76800; i++)
-    {
-        out[i] = src[2 * i] * 256 + src[2 * i + 1];
-    }
-}
-
-void draw_fast_pic(uint8_t *bitmap, int16_t w, int16_t h)
-{
-    tft.startWrite();
-    for (int16_t j = 0; j < h; j += 2)
-    {
-        for (int16_t i = 0; i < w; i += 2)
-        {
-            uint16_t temp = bitmap[j * w * 2 + 2 * i] * 256 + bitmap[j * w * 2 + 2 * i + 1];
-            tft.writePixel(i, j, temp);
-        }
-    }
-    tft.endWrite();
 }
 
 unsigned long testFillScreen()

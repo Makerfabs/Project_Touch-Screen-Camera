@@ -181,18 +181,15 @@ int read_img_msg(fs::FS &fs, const char *filename)
     }
     */
     // bmp file header
-    // 文件标识符，必须为"BM"，即0x424D 才是Windows位图文件
     f.seek(0);
     char bfType[3];
     f.readBytes(bfType, 2);
     bfType[2] = '\0';
 
-    // 整个BMP文件的大小（以位B为单位）
     f.seek(0x2);
     uint8_t bfSize[4];
     f.read(bfSize, 4);
 
-    // 说明从文件头0000h开始到图像像素数据的字节偏移量（以字节Bytes为单位）
     f.seek(0xa);
     uint8_t bfOffBits[4];
     f.read(bfOffBits, 4);
@@ -215,7 +212,6 @@ int print_img(fs::FS &fs, String filename)
         return 0;
     }
 
-    // 从54偏移位置开始读
     f.seek(54);
     int X = 480;
     int Y = 320;
@@ -228,7 +224,7 @@ int print_img(fs::FS &fs, String filename)
         SPI_ON_TFT;
         for (int col = 0; col < X; col++)
         {
-            tft.drawPixel(col, row, tft.color565(RGB[col * 3 + 2], RGB[col * 3] + 1, RGB[col * 3]));
+            tft.drawPixel(col, row, tft.color565(RGB[col * 3 + 2], RGB[col * 3 + 1], RGB[col * 3]));
         }
         SPI_OFF_TFT;
         SPI_ON_SD;
