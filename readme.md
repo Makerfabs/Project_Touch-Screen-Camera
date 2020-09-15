@@ -34,6 +34,20 @@ The realization of a simple digital camera, you can take pictures through the ca
 - ESP32 Touch Camera
 - Micro SD card
 
+## Related projects
+
+[ESP32 2048 GAME](https://github.com/Makerfabs/Project_ESP32-2048GAME)
+
+Implement a 2048 game on "ESP32 Touch Camera". 
+
+![2048](md_pic/2048.gif)
+
+[ESP32 Flappy Bird](https://github.com/Makerfabs/Project_ESP32-Flappy-Bird)
+
+Implement a Flappy Bird game on "ESP32 Touch Camera". 
+
+![Flappy](md_pic/Flappy.gif)
+
 
 
 # ESP32 Touch Camera
