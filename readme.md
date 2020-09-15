@@ -79,6 +79,8 @@ Four projects were implemented : "Camera", "Touch_Draw", "SD2TFT" and "Receive W
 
 - Use your hand or stylus (resistance screen) to draw on the screen.
 
+![Touch_Draw_V2](md_pic/draw2.jpg)
+
 ### SD2TFT 
 
 - Display pictures from SD card.

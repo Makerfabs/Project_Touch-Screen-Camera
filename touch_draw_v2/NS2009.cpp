@@ -22,6 +22,7 @@ unsigned int ns2009_read(uint8_t cmd)
     return (buf[0] << 4) | (buf[1] >> 4);
 }
 
+//Press maybe not correct
 int ns2009_get_press()
 {
     return ns2009_read(NS2009_LOW_POWER_READ_Z1);
