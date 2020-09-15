@@ -2,10 +2,11 @@
 
 ```c++
 /*
-Version:		V3.0
+Version:		V3.1
 Author:			Vincent
 Create Date:	2020/8/19
 Note:
+	V3.1 : Replace the picture with the new hardware.
 	V3.0 : Delete many useless code. Add FAQ.
 	V2.0 : Change ILI9488 driver,use LovyanGFX lib.Ten times faster than before!!!
 	
@@ -13,7 +14,7 @@ Note:
 ```
 [ESP32 Touch Camera](https://www.youtube.com/watch?v=zWUy4gcwMs4&feature=youtu.be)
 
-![main](md_pic/main.jpg)
+![](md_pic/main.jpg)
 
 
 [toc]
@@ -87,14 +88,24 @@ Four projects were implemented : "Camera", "Touch_Draw", "SD2TFT" and "Receive W
 
 ### Receive WiFi Video
 
+Transmit the contents of the monitor to the TFT screen via Wifi.A host computer software is provided to box select the areas of the screen that need to be transferred.
+
 Change from [MakePython ESP32 Color LCD で 動画をWiFi受信](https://homemadegarbage.com/makerfabs05)
 
 - Upload file : "/Project_Touch-Screen-Camra/ESP32_ScreenShotReceiver-master/ScreenShotReceiver/ScreenShotReceiver.ino"
 - Open "/Project_Touch-Screen-Camra/ESP32_ScreenShotReceiver-master/ScreenShotSender.exe"
 - Input IP on the screen.
-- Push connect.
 
 ![wifiscreen](md_pic/wifi_screen.jpg)
+
+- Push connect.
+- Start share your screen to TFT.
+
+![wifi_screen](md_pic/wifi_screen.gif)
+
+
+
+
 
 
 
