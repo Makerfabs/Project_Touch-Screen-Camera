@@ -15,6 +15,6 @@ void ns2009_recv(const uint8_t *send_buf, size_t send_buf_len, uint8_t *receive_
 
 unsigned ns2009_read(uint8_t cmd, int *val);
 
-void ns2009_pos(int pos[2]);
+int ns2009_pos(int pos[2]);
 
 int ns2009_get_press();

@@ -295,7 +295,7 @@ void camera_init()
     //initial sensors are flipped vertically and colors are a bit saturated
     if (s->id.PID == OV2640_PID)
     {
-        s->set_vflip(s, 0);      //flip it back
+        s->set_vflip(s, 1);      //flip it back
         s->set_brightness(s, 0); //up the blightness just a bit
         s->set_saturation(s, 1); //lower the saturation
     }

@@ -27,17 +27,19 @@ int ns2009_get_press()
     return ns2009_read(NS2009_LOW_POWER_READ_Z1);
 }
 
-void ns2009_pos(int pos[2])
+int ns2009_pos(int pos[2])
 {
     int press = ns2009_read(NS2009_LOW_POWER_READ_Z1);
-    if (press > 300 || press < 800)
-    {
-        int x, y, z = 0;
 
-        x = ns2009_read(NS2009_LOW_POWER_READ_X);
-        y = ns2009_read(NS2009_LOW_POWER_READ_Y);
+    int x, y = 0;
 
-        pos[0] = x * SCREEN_X_PIXEL / 4096; //4096 = 2 ^ 12
-        pos[1] = y * SCREEN_Y_PIXEL / 4096;
-    }
+    x = ns2009_read(NS2009_LOW_POWER_READ_X);
+    y = ns2009_read(NS2009_LOW_POWER_READ_Y);
+
+    pos[0] = x * SCREEN_X_PIXEL / 4096; //4096 = 2 ^ 12
+    pos[1] = y * SCREEN_Y_PIXEL / 4096;
+
+    //pos[0] = x;
+    //pos[1] = y;
+    return press;
 }
