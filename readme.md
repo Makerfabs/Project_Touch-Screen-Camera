@@ -52,7 +52,9 @@ Implement a Flappy Bird game on "ESP32 Touch Camera".
 
 # ESP32 Touch Camera
 
-## ~~Product link ：~~[ ~~ESP32 Touch Camera~~]() 
+## Product link ：[ ESP32 Touch Camera(Resistive)](https://www.makerfabs.com/esp32-3.5-inch-tft-touch-resistive-with-camera.html) 
+
+## Product link ：[ ESP32 Touch Camera(Capacitive)](https://www.makerfabs.com/esp32-3.5-inch-tft-touch-capacitive-with-camera.html) 
 
 The ESP32 Touch Camera use ILI9488 screen, which comes with resistive or capacitive screens. Have an OV2640 camera and SD card slot. It can be used as a webcam, an electronic album, or a digital camera. Support for Arduino and MicroPython. 
 
