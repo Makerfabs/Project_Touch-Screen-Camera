@@ -4,21 +4,19 @@
 #include "esp_camera.h"
 #define CAMERA_MODEL_MAKERFABS
 #include "camera_pins.h"
+#include "HTTPClient.h"
 
 #include <LovyanGFX.hpp>
 #include "makerfabs_pin.h"
 
 //If undefine debug, will be faster
 //#define SERIAL_DEBUG
+#define WIFI_MODE
 
 #define ARRAY_LENGTH 320 * 240 * 3
 
-//Choice your touch IC
-#define ESP32_SDA 26
-#define ESP32_SCL 27
-
 //#define NS2009_TOUCH //Resistive screen driver
-#define FT6236_TOUCH      //Capacitive screen driver
+#define FT6236_TOUCH //Capacitive screen driver
 
 #ifdef NS2009_TOUCH
 #include "NS2009.h"
@@ -30,31 +28,19 @@ const int i2c_touch_addr = NS2009_ADDR;
 const int i2c_touch_addr = TOUCH_I2C_ADD;
 #endif
 
-//SPI
-#define TFT_CS 15
-#define TFT_DC 33
-#define TFT_LED -1
-#define TFT_RST -1
-#define SPI_MOSI 13
-#define SPI_MISO 12
-#define SPI_SCK 14
-
-//SD Card
-#define SD_CS 4
-
 //SPI control
-#define SPI_ON_TFT digitalWrite(TFT_CS, LOW)
-#define SPI_OFF_TFT digitalWrite(TFT_CS, HIGH)
-#define SPI_ON_SD digitalWrite(SD_CS, LOW)
-#define SPI_OFF_SD digitalWrite(SD_CS, HIGH)
+#define SPI_ON_TFT digitalWrite(ESP32_TSC_9488_LCD_CS, LOW)
+#define SPI_OFF_TFT digitalWrite(ESP32_TSC_9488_LCD_CS, HIGH)
+#define SPI_ON_SD digitalWrite(ESP32_TSC_9488_SD_CS, LOW)
+#define SPI_OFF_SD digitalWrite(ESP32_TSC_9488_SD_CS, HIGH)
 
 struct LGFX_Config
 {
-    static constexpr spi_host_device_t spi_host = VSPI_HOST;
+    static constexpr spi_host_device_t spi_host = ESP32_TSC_9488_LCD_SPI_HOST;
     static constexpr int dma_channel = 1;
-    static constexpr int spi_sclk = LCD_SCK;
-    static constexpr int spi_mosi = LCD_MOSI;
-    static constexpr int spi_miso = LCD_MISO;
+    static constexpr int spi_sclk = ESP32_TSC_9488_LCD_SCK;
+    static constexpr int spi_mosi = ESP32_TSC_9488_LCD_MOSI;
+    static constexpr int spi_miso = ESP32_TSC_9488_LCD_MISO;
 };
 
 static lgfx::LGFX_SPI<LGFX_Config> tft;
@@ -157,6 +143,11 @@ void loop()
             stream_flag = 0;
             tft.fillRect(0, 0, 320, 240, TFT_BLACK);
             print_img(SD, imgname);
+
+#ifdef WIFI_MODE
+            TestPostFileStream(imgname);
+            show_log(4);
+#endif
         }
     }
 
@@ -199,7 +190,7 @@ void esp32_init()
     Serial.println("ILI9488 Test!");
 
     //I2C init
-    Wire.begin(I2C_SDA, I2C_SCL);
+    Wire.begin(ESP32_TSC_9488_I2C_SDA, ESP32_TSC_9488_I2C_SCL);
     byte error, address;
 
     Wire.beginTransmission(i2c_touch_addr);
@@ -218,16 +209,16 @@ void esp32_init()
     }
 
     //SPI init
-    pinMode(SD_CS, OUTPUT);
-    pinMode(TFT_CS, OUTPUT);
+    pinMode(ESP32_TSC_9488_SD_CS, OUTPUT);
+    pinMode(ESP32_TSC_9488_LCD_CS, OUTPUT);
     SPI_OFF_SD;
     SPI_OFF_TFT;
 
-    SPI.begin(SPI_SCK, SPI_MISO, SPI_MOSI);
+    SPI.begin(ESP32_TSC_9488_HSPI_SCK, ESP32_TSC_9488_HSPI_MISO, ESP32_TSC_9488_HSPI_MOSI);
 
     //SD(SPI) init
     SPI_ON_SD;
-    if (!SD.begin(SD_CS, SPI, 80000000))
+    if (!SD.begin(ESP32_TSC_9488_SD_CS, SPI, 60000000))
     {
         Serial.println("Card Mount Failed");
         while (1)
@@ -250,6 +241,29 @@ void esp32_init()
     draw_button();
     SPI_OFF_TFT;
     Serial.println("TFT init over.");
+
+#ifdef WIFI_MODE
+    // Trying to solve pn open, type:2 0 error with this line:
+    WiFi.mode(WIFI_OFF);
+
+    for (uint8_t t = 4; t > 0; t--)
+    {
+        Serial.printf("[SETUP] WAIT %d...\n", t);
+        Serial.flush();
+        delay(200);
+    }
+
+    Serial.println("Connecting to WIFI");
+    // wait for WiFi connection
+    WiFi.mode(WIFI_STA);
+    WiFi.begin("Makerfabs", "20160704");
+    while (WiFi.status() != WL_CONNECTED)
+    {
+        Serial.print(".");
+        delay(50);
+    }
+    Serial.println("\nWIFI CONNECTED");
+#endif
 }
 
 //Camera setting
@@ -402,7 +416,7 @@ void show_log(int cmd_type)
         break;
 
     case 1:
-        tft.println("Show las photo");
+        tft.println("Show last photo");
         tft.println(imgname);
         break;
 
@@ -412,6 +426,12 @@ void show_log(int cmd_type)
 
     case 3:
         tft.println("NEED STREAM");
+        break;
+
+    case 4:
+        tft.println("Show last photo");
+        tft.println(imgname);
+        tft.println("Upload success");
         break;
 
     default:
@@ -452,6 +472,55 @@ unsigned long testFillScreen()
     return micros() - start;
     SPI_OFF_TFT;
 }
+
+#ifdef WIFI_MODE
+void TestPostFileStream(String file_name)
+{
+    SPI_ON_SD;
+    HTTPClient http;
+    String filename = String(img_index - 1) + "write.bmp";
+    String pathname = file_name;
+    String archDomainAddress = "http://192.168.1.128:5002/json";
+
+    http.begin(archDomainAddress);
+    http.addHeader("Content-Type", "text/plain");
+
+    File payloadFile = SD.open(pathname, FILE_READ);
+    if (payloadFile)
+    {
+        Serial.println("File exists, starting POST");
+
+        http.addHeader("File-Name", filename);
+        int httpCode = http.sendRequest("POST", &payloadFile, payloadFile.size());
+
+        if (httpCode > 0)
+        {
+            // HTTP header has been send and Server response header has been handled
+            Serial.printf("[HTTP] POST... code: %d\n", httpCode);
+
+            // file found at server
+            if (httpCode >= 200 && httpCode < 300)
+            {
+                String payload = http.getString();
+                Serial.println("SUCCESS! DATA RECEIVED: ");
+                Serial.println(payload);
+            }
+        }
+        else
+        {
+            Serial.printf("[HTTP] POST... failed, error: %s\n", http.errorToString(httpCode).c_str());
+        }
+    }
+    else
+    {
+        Serial.println("File does not exist!");
+    }
+    payloadFile.close();
+    http.end();
+    SPI_OFF_SD;
+    Serial.println("POST over");
+}
+#endif
 
 void set_tft()
 {
@@ -494,18 +563,18 @@ void set_tft()
 
     // LCDのCSを接続したピン番号を設定します。
     // 使わない場合は省略するか-1を設定します。
-    panel.spi_cs = LCD_CS;
+    panel.spi_cs = ESP32_TSC_9488_LCD_CS;
 
     // LCDのDCを接続したピン番号を設定します。
-    panel.spi_dc = LCD_DC;
+    panel.spi_dc = ESP32_TSC_9488_LCD_DC;
 
     // LCDのRSTを接続したピン番号を設定します。
     // 使わない場合は省略するか-1を設定します。
-    panel.gpio_rst = LCD_RST;
+    panel.gpio_rst = ESP32_TSC_9488_LCD_RST;
 
     // LCDのバックライトを接続したピン番号を設定します。
     // 使わない場合は省略するか-1を設定します。
-    panel.gpio_bl = LCD_BL;
+    panel.gpio_bl = ESP32_TSC_9488_LCD_BL;
 
     // バックライト使用時、輝度制御に使用するPWMチャンネル番号を設定します。
     // PWM輝度制御を使わない場合は省略するか-1を設定します。
@@ -526,13 +595,13 @@ void set_tft()
     // パネルのメモリが持っているピクセル数（幅と高さ）を設定します。
     // 設定が合っていない場合、setRotationを使用した際の座標がずれます。
     // （例：ST7735は 132x162 / 128x160 / 132x132 の３通りが存在します）
-    panel.memory_width = LCD_WIDTH;
-    panel.memory_height = LCD_HEIGHT;
+    panel.memory_width = ESP32_TSC_9488_LCD_WIDTH;
+    panel.memory_height = ESP32_TSC_9488_LCD_HEIGHT;
 
     // パネルの実際のピクセル数（幅と高さ）を設定します。
     // 省略時はパネルクラスのデフォルト値が使用されます。
-    panel.panel_width = LCD_WIDTH;
-    panel.panel_height = LCD_HEIGHT;
+    panel.panel_width = ESP32_TSC_9488_LCD_WIDTH;
+    panel.panel_height = ESP32_TSC_9488_LCD_HEIGHT;
 
     // パネルのオフセット量を設定します。
     // 省略時はパネルクラスのデフォルト値が使用されます。
