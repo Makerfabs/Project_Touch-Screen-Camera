@@ -2,10 +2,11 @@
 
 ```c++
 /*
-Version:		V3.1
+Version:		V3.2
 Author:			Vincent
 Create Date:	2020/8/19
 Note:
+	V3.2 : Added the ability to upload photos to PC through WiFi. 
 	V3.1 : Replace the picture with the new hardware.
 	V3.0 : Delete many useless code. Add FAQ.
 	V2.0 : Change ILI9488 driver,use LovyanGFX lib.Ten times faster than before!!!
@@ -203,6 +204,29 @@ const int i2c_touch_addr = TOUCH_I2C_ADD;
 - You can unplug your SD card and plug it into your computer to view your photos.
 
 ![camera_sd](md_pic/camera_sd.jpg)
+
+## V3.2 Upload photos via WiFi
+Added the function of sending photos to PC via HTTP protocol by post method.
+- Remove comments before WIFI_MODE
+
+```c++
+#define WIFI_MODE
+```
+- Set the wifi ssid and password.
+
+```c++
+// wait for WiFi connection
+WiFi.mode(WIFI_STA);
+WiFi.begin("Makerfabs", "20160704");
+```
+- Upload code to ESP32 camera.
+- Run the server.py  on PC side.(Make sure to run in the directory server.py, otherwise the upload path cannot be found.)
+
+![server](md_pic/server.jpg)
+- Every time you click to show the last photo, it will be automatically uploaded.
+
+![upload_pic](md_pic/upload_pic.jpg)
+- In a few seconds, the picture will be uploaded to the Upload folder.
 
 
 
