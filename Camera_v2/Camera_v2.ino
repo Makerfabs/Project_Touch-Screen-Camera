@@ -11,12 +11,12 @@
 
 //If undefine debug, will be faster
 //#define SERIAL_DEBUG
-#define WIFI_MODE
+//#define WIFI_MODE
 
 #define ARRAY_LENGTH 320 * 240 * 3
 
-//#define NS2009_TOUCH //Resistive screen driver
-#define FT6236_TOUCH //Capacitive screen driver
+#define NS2009_TOUCH //Resistive screen driver
+//#define FT6236_TOUCH //Capacitive screen driver
 
 #ifdef NS2009_TOUCH
 #include "NS2009.h"
