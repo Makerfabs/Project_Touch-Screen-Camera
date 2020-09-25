@@ -15,8 +15,10 @@
 
 #define ARRAY_LENGTH 320 * 240 * 3
 
-#define NS2009_TOUCH //Resistive screen driver
-//#define FT6236_TOUCH //Capacitive screen driver
+//#define NS2009_TOUCH //Resistive screen driver
+#define FT6236_TOUCH //Capacitive screen driver
+
+#define SCRENN_ROTATION 3
 
 #ifdef NS2009_TOUCH
 #include "NS2009.h"
@@ -99,10 +101,11 @@ void loop()
     String pos_str = (String)pos[0] + "," + (String)pos[1] + "," + (String)ns2009_get_press();
     Serial.println(pos_str);
 #endif
+    pos_rotation(pos, SCRENN_ROTATION);
 
-    if (0 < pos[0] && pos[0] < 100)
+    if (320 < pos[0] && pos[0] < 480)
     {
-        if (240 < pos[1] && pos[1] < 340)
+        if (0 < pos[1] && pos[1] < 80)
         {
             if (stream_flag == 1)
             {
@@ -115,8 +118,12 @@ void loop()
                 ptrVal = heap_caps_malloc(ARRAY_LENGTH, MALLOC_CAP_SPIRAM);
                 uint8_t *rgb = (uint8_t *)ptrVal;
                 fmt2rgb888(fb->buf, fb->len, PIXFORMAT_RGB565, rgb);
-                save_image(SD, rgb);
-                show_log(0);
+                if (save_image(SD, rgb) == -1)
+                {
+                    show_log(5);
+                }
+                else
+                    show_log(0);
                 heap_caps_free(ptrVal);
                 rgb = NULL;
             }
@@ -129,11 +136,8 @@ void loop()
                 show_log(3);
             }
         }
-    }
 
-    if (pos[0] < 210 && pos[0] > 110)
-    {
-        if (pos[1] < 340 && pos[1] > 240)
+        if (pos[1] > 80 && pos[1] < 160)
         {
 #ifdef SERIAL_DEBUG
             Serial.println("Last photo:");
@@ -149,11 +153,8 @@ void loop()
             show_log(4);
 #endif
         }
-    }
 
-    if (pos[0] < 320 && pos[0] > 220)
-    {
-        if (pos[1] < 340 && pos[1] > 240)
+        if (pos[1] < 240 && pos[1] > 160)
         {
 #ifdef SERIAL_DEBUG
             Serial.println("START STREAM");
@@ -163,6 +164,7 @@ void loop()
         }
     }
 
+    /*
     if (pos[0] < 320 && pos[0] > 220)
     {
         if (pos[1] < 480 && pos[1] > 440)
@@ -174,6 +176,7 @@ void loop()
             testFillScreen();
         }
     }
+    */
 
     esp_camera_fb_return(fb);
 
@@ -236,7 +239,7 @@ void esp32_init()
     SPI_ON_TFT;
     set_tft();
     tft.begin();
-    tft.setRotation(0);
+    tft.setRotation(SCRENN_ROTATION);
     tft.fillScreen(TFT_BLACK);
     draw_button();
     SPI_OFF_TFT;
@@ -346,21 +349,21 @@ int save_image(fs::FS &fs, uint8_t *rgb)
 void draw_button()
 {
     SPI_ON_TFT;
-    tft.fillRect(0, 240, 100, 100, TFT_BLUE);
-    tft.fillRect(110, 240, 100, 100, TFT_BLUE);
-    tft.fillRect(220, 240, 100, 100, TFT_BLUE);
-    tft.fillRect(220, 440, 100, 40, TFT_GREEN);
+    tft.fillRect(330, 0, 150, 70, TFT_BLUE);
+    tft.fillRect(330, 80, 150, 70, TFT_BLUE);
+    tft.fillRect(330, 160, 150, 70, TFT_BLUE);
+    //tft.fillRect(220, 440, 100, 40, TFT_GREEN);
 
     tft.setTextColor(TFT_WHITE);
     tft.setTextSize(1);
-    tft.setCursor(10, 290);
+    tft.setCursor(340, 30);
     tft.println("TAKE PHOTO");
-    tft.setCursor(120, 290);
+    tft.setCursor(340, 110);
     tft.println("LAST PHOTO");
-    tft.setCursor(230, 290);
+    tft.setCursor(340, 190);
     tft.println("START STREAM");
-    tft.setCursor(230, 450);
-    tft.println("TEST");
+    //tft.setCursor(230, 450);
+    //tft.println("TEST");
 
     SPI_OFF_TFT;
 }
@@ -402,11 +405,11 @@ int print_img(fs::FS &fs, String filename)
 void show_log(int cmd_type)
 {
     SPI_ON_TFT;
-    tft.fillRect(0, 340, 220, 140, TFT_BLACK);
+    tft.fillRect(0, 240, 480, 80, TFT_BLACK);
 
     tft.setTextColor(TFT_RED);
     tft.setTextSize(2);
-    tft.setCursor(0, 360);
+    tft.setCursor(30, 280);
 
     switch (cmd_type)
     {
@@ -432,6 +435,9 @@ void show_log(int cmd_type)
         tft.println("Show last photo");
         tft.println(imgname);
         tft.println("Upload success");
+        break;
+    case 5:
+        tft.println("Write sd card wrong");
         break;
 
     default:
@@ -617,4 +623,21 @@ void set_tft()
 
     // 設定を終えたら、LGFXのsetPanel関数でパネルのポインタを渡します。
     tft.setPanel(&panel);
+}
+
+void pos_rotation(int pos[2], int rotation)
+{
+    if (pos[0] == -1)
+        return;
+    if (rotation == 0)
+    {
+        return;
+    }
+    if (rotation == 3)
+    {
+        int tempx = 480 - pos[1];
+        int tempy = pos[0];
+        pos[0] = tempx;
+        pos[1] = tempy;
+    }
 }

@@ -30,7 +30,7 @@ int ns2009_get_press()
 void ns2009_pos(int pos[2])
 {
     int press = ns2009_read(NS2009_LOW_POWER_READ_Z1);
-    if (press > 300)
+    if (press > 30)
     {
         int x, y, z = 0;
 
