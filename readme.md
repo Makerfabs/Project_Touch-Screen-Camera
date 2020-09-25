@@ -2,10 +2,11 @@
 
 ```c++
 /*
-Version:		V3.2
+Version:		V3.3
 Author:			Vincent
 Create Date:	2020/8/19
 Note:
+	V3.3 : Change UI direction.
 	V3.2 : Added the ability to upload photos to PC through WiFi. 
 	V3.1 : Replace the picture with the new hardware.
 	V3.0 : Delete many useless code. Add FAQ.
@@ -227,6 +228,9 @@ WiFi.begin("Makerfabs", "20160704");
 
 ![upload_pic](md_pic/upload_pic.jpg)
 - In a few seconds, the picture will be uploaded to the Upload folder.
+- V3.3  :  The UI has changed, but the functionality remains the same.
+
+![new_ui](md_pic/new_ui.jpg)
 
 
 
