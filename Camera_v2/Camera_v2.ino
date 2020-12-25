@@ -189,6 +189,7 @@ void loop()
 //ILI9488 init and SD card init
 void esp32_init()
 {
+    int SD_init_flag = 0;
     Serial.begin(115200);
     Serial.println("ILI9488 Test!");
 
@@ -224,8 +225,9 @@ void esp32_init()
     if (!SD.begin(ESP32_TSC_9488_SD_CS, SPI, 60000000))
     {
         Serial.println("Card Mount Failed");
-        while (1)
-            ;
+        SD_init_flag = 1;
+
+        //while (1);
     }
     else
     {
@@ -241,6 +243,48 @@ void esp32_init()
     tft.begin();
     tft.setRotation(SCRENN_ROTATION);
     tft.fillScreen(TFT_BLACK);
+
+    //if SD init failed
+    if (SD_init_flag == 1)
+    {
+        tft.setTextColor(TFT_RED);
+        tft.setTextSize(3);
+        tft.setCursor(10, 10);
+        tft.println("  SD card initialization failed, please re-insert.");
+        tft.setCursor(10, 60);
+        tft.println("  Or touch the screen using only the camera (showing only the output stream)");
+
+        tft.fillRect(100, 160, 280, 160, TFT_BLUE);
+        tft.setCursor(130, 190);
+        tft.println("    TOUCH");
+        tft.setCursor(140, 220);
+        tft.println("     TO");
+        tft.setCursor(120, 250);
+        tft.println("   CONTINUE");
+
+        int pos[2] = {0, 0};
+
+        while (1)
+        {
+            ft6236_pos(pos);
+            if (pos[0] > 100 && pos[0] < 380 && pos[1] > 160 && pos[1] < 320)
+                break;
+            delay(100);
+        }
+    }
+    else
+    {
+        tft.setRotation(1);
+
+        SPI_OFF_TFT;
+        delay(10);
+        print_logo_img(SD, "/logo.bmp");
+        SPI_ON_TFT;
+
+        delay(1000);
+        tft.setRotation(3);
+    }
+
     draw_button();
     SPI_OFF_TFT;
     Serial.println("TFT init over.");
@@ -349,6 +393,7 @@ int save_image(fs::FS &fs, uint8_t *rgb)
 void draw_button()
 {
     SPI_ON_TFT;
+    tft.fillScreen(TFT_BLACK);
     tft.fillRect(330, 0, 150, 70, TFT_BLUE);
     tft.fillRect(330, 80, 150, 70, TFT_BLUE);
     tft.fillRect(330, 160, 150, 70, TFT_BLUE);
@@ -382,6 +427,43 @@ int print_img(fs::FS &fs, String filename)
     f.seek(54);
     int X = 320;
     int Y = 240;
+    uint8_t RGB[3 * X];
+    for (int row = 0; row < Y; row++)
+    {
+        f.seek(54 + 3 * X * row);
+        f.read(RGB, 3 * X);
+        SPI_OFF_SD;
+        SPI_ON_TFT;
+        for (int col = 0; col < X; col++)
+        {
+            tft.drawPixel(col, row, tft.color565(RGB[col * 3 + 2], RGB[col * 3 + 1], RGB[col * 3]));
+        }
+        SPI_OFF_TFT;
+        SPI_ON_SD;
+    }
+
+    f.close();
+    SPI_OFF_SD;
+    return 0;
+}
+
+int print_logo_img(fs::FS &fs, String filename)
+{
+    SPI_ON_SD;
+    File f = fs.open(filename);
+    if (!f)
+    {
+        Serial.println("Failed to open file for reading");
+        return 0;
+    }
+    else
+    {
+        Serial.println("Success open file for reading");
+    }
+
+    f.seek(54);
+    int X = 480;
+    int Y = 320;
     uint8_t RGB[3 * X];
     for (int row = 0; row < Y; row++)
     {
