@@ -7,6 +7,8 @@
 #define SPI_MISO 12
 #define SPI_SCK 14
 
+#define LCD_CS 15
+
 //SD Card
 #define SD_CS 4
 
@@ -21,6 +23,9 @@ int file_num = 0;
 void setup()
 {
     Serial.begin(115200);
+
+    //CLOSE LCD SPI
+    digitalWrite(LCD_CS, HIGH)
 
     //SPI init
     pinMode(SD_CS, OUTPUT);
