@@ -266,7 +266,13 @@ void esp32_init()
 
         while (1)
         {
+#ifdef NS2009_TOUCH
+            ns2009_pos(pos);
+#endif
+#ifdef FT6236_TOUCH
             ft6236_pos(pos);
+#endif
+
             if (pos[0] > 100 && pos[0] < 380 && pos[1] > 160 && pos[1] < 320)
                 break;
             delay(100);
