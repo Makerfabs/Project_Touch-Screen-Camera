@@ -14,7 +14,7 @@
 #define SCRENN_ROTATION 3
 
 //#define NS2009_TOUCH  //Resistive screen driver
-#define FT6236_TOUCH    //Capacitive screen driver
+#define FT6236_TOUCH //Capacitive screen driver
 
 #ifdef NS2009_TOUCH
 #include "NS2009.h"
@@ -71,8 +71,6 @@ void loop()
 
     if (stream_flag == 1)
     {
-        //Display rgb565 picture
-        //drawRGBBitmap(fb->buf, fb->width, fb->height);
         tft.pushImage(0, 0, fb->width, fb->height, (lgfx::swap565_t *)fb->buf);
     }
 
@@ -109,7 +107,7 @@ void loop()
             show_log(1);
             stream_flag = 0;
             tft.fillRect(0, 0, 320, 240, TFT_BLACK);
-            print_img(SD, imgname);
+            print_img(SD, imgname, 320, 240);
 
 #ifdef WIFI_MODE
             TestPostFileStream(imgname);
@@ -162,7 +160,7 @@ void esp32_init()
 
     //SD(SPI) init
     SPI_ON_SD;
-    if (!SD.begin(ESP32_TSC_9488_SD_CS, SPI, 60000000))
+    if (!SD.begin(ESP32_TSC_9488_SD_CS, SPI, 40000000))
     {
         Serial.println("Card Mount Failed");
         SD_init_flag = 1;
@@ -217,7 +215,7 @@ void esp32_init()
 
         SPI_OFF_TFT;
         delay(10);
-        print_logo_img(SD, "/logo.bmp");
+        print_img(SD, "/logo.bmp", 480, 320);
         SPI_ON_TFT;
 
         delay(1000);
@@ -336,7 +334,6 @@ void draw_button()
     tft.fillRect(330, 0, 150, 70, TFT_BLUE);
     tft.fillRect(330, 80, 150, 70, TFT_BLUE);
     tft.fillRect(330, 160, 150, 70, TFT_BLUE);
-    //tft.fillRect(220, 440, 100, 40, TFT_GREEN);
 
     tft.setTextColor(TFT_WHITE);
     tft.setTextSize(1);
@@ -346,14 +343,12 @@ void draw_button()
     tft.println("LAST PHOTO");
     tft.setCursor(340, 190);
     tft.println("START STREAM");
-    //tft.setCursor(230, 450);
-    //tft.println("TEST");
 
     SPI_OFF_TFT;
 }
 
 //Display image from file
-int print_img(fs::FS &fs, String filename)
+int print_img(fs::FS &fs, String filename, int x, int y)
 {
     SPI_ON_SD;
     File f = fs.open(filename, "r");
@@ -365,58 +360,15 @@ int print_img(fs::FS &fs, String filename)
     }
 
     f.seek(54);
-    int X = 320;
-    int Y = 240;
+    int X = x;
+    int Y = y;
     uint8_t RGB[3 * X];
     for (int row = 0; row < Y; row++)
     {
         f.seek(54 + 3 * X * row);
         f.read(RGB, 3 * X);
         SPI_OFF_SD;
-        SPI_ON_TFT;
-        for (int col = 0; col < X; col++)
-        {
-            tft.drawPixel(col, row, tft.color565(RGB[col * 3 + 2], RGB[col * 3 + 1], RGB[col * 3]));
-        }
-        SPI_OFF_TFT;
-        SPI_ON_SD;
-    }
-
-    f.close();
-    SPI_OFF_SD;
-    return 0;
-}
-
-int print_logo_img(fs::FS &fs, String filename)
-{
-    SPI_ON_SD;
-    File f = fs.open(filename);
-    if (!f)
-    {
-        Serial.println("Failed to open file for reading");
-        f.close();
-        return 0;
-    }
-    else
-    {
-        Serial.println("Success open file for reading");
-    }
-
-    f.seek(54);
-    int X = 480;
-    int Y = 320;
-    uint8_t RGB[3 * X];
-    for (int row = 0; row < Y; row++)
-    {
-        f.seek(54 + 3 * X * row);
-        f.read(RGB, 3 * X);
-        SPI_OFF_SD;
-        SPI_ON_TFT;
-        for (int col = 0; col < X; col++)
-        {
-            tft.drawPixel(col, row, tft.color565(RGB[col * 3 + 2], RGB[col * 3 + 1], RGB[col * 3]));
-        }
-        SPI_OFF_TFT;
+        tft.pushImage(0, row, X, 1, (lgfx::rgb888_t *)RGB);
         SPI_ON_SD;
     }
 
@@ -466,39 +418,6 @@ void show_log(int cmd_type)
     default:
         break;
     }
-    SPI_OFF_TFT;
-}
-
-void drawRGBBitmap(uint8_t *bitmap, int16_t w, int16_t h)
-{
-    SPI_ON_TFT;
-    tft.startWrite();
-    for (int16_t j = 0; j < h; j++)
-    {
-        for (int16_t i = 0; i < w; i++)
-        {
-            uint16_t temp = bitmap[j * w * 2 + 2 * i] * 256 + bitmap[j * w * 2 + 2 * i + 1];
-            tft.writePixel(i, j, temp);
-        }
-    }
-    tft.endWrite();
-    SPI_OFF_TFT;
-}
-
-unsigned long testFillScreen()
-{
-    SPI_ON_TFT;
-    unsigned long start = micros();
-    tft.fillRect(0, 0, 320, 240, TFT_YELLOW);
-    tft.fillRect(0, 0, 320, 240, TFT_RED);
-    tft.fillRect(0, 0, 320, 240, TFT_GREEN);
-    tft.fillRect(0, 0, 320, 240, TFT_BLUE);
-    tft.fillRect(0, 0, 320, 240, TFT_BLACK);
-    start = micros() - start;
-    tft.fillRect(0, 340, 220, 140, TFT_BLACK);
-    tft.setCursor(0, 360);
-    tft.println("cost:" + (String)start);
-    return micros() - start;
     SPI_OFF_TFT;
 }
 
@@ -553,101 +472,19 @@ void TestPostFileStream(String file_name)
 
 void set_tft()
 {
-    // パネルクラスに各種設定値を代入していきます。
-    // （LCD一体型製品のパネルクラスを選択した場合は、
-    //   製品に合った初期値が設定されているので設定は不要です）
-
-    // 通常動作時のSPIクロックを設定します。
-    // ESP32のSPIは80MHzを整数で割った値のみ使用可能です。
-    // 設定した値に一番近い設定可能な値が使用されます。
-    panel.freq_write = 60000000;
-    //panel.freq_write = 20000000;
-
-    // 単色の塗り潰し処理時のSPIクロックを設定します。
-    // 基本的にはfreq_writeと同じ値を設定しますが、
-    // より高い値を設定しても動作する場合があります。
-    panel.freq_fill = 60000000;
-    //panel.freq_fill  = 27000000;
-
-    // LCDから画素データを読取る際のSPIクロックを設定します。
+    panel.freq_write = 40000000;
+    panel.freq_fill = 40000000;
     panel.freq_read = 16000000;
 
-    // SPI通信モードを0~3から設定します。
-    panel.spi_mode = 0;
-
-    // データ読み取り時のSPI通信モードを0~3から設定します。
-    panel.spi_mode_read = 0;
-
-    // 画素読出し時のダミービット数を設定します。
-    // 画素読出しでビットずれが起きる場合に調整してください。
-    panel.len_dummy_read_pixel = 8;
-
-    // データの読取りが可能なパネルの場合はtrueを、不可の場合はfalseを設定します。
-    // 省略時はtrueになります。
-    panel.spi_read = true;
-
-    // データの読取りMOSIピンで行うパネルの場合はtrueを設定します。
-    // 省略時はfalseになります。
-    panel.spi_3wire = false;
-
-    // LCDのCSを接続したピン番号を設定します。
-    // 使わない場合は省略するか-1を設定します。
     panel.spi_cs = ESP32_TSC_9488_LCD_CS;
-
-    // LCDのDCを接続したピン番号を設定します。
     panel.spi_dc = ESP32_TSC_9488_LCD_DC;
-
-    // LCDのRSTを接続したピン番号を設定します。
-    // 使わない場合は省略するか-1を設定します。
     panel.gpio_rst = ESP32_TSC_9488_LCD_RST;
-
-    // LCDのバックライトを接続したピン番号を設定します。
-    // 使わない場合は省略するか-1を設定します。
     panel.gpio_bl = ESP32_TSC_9488_LCD_BL;
 
-    // バックライト使用時、輝度制御に使用するPWMチャンネル番号を設定します。
-    // PWM輝度制御を使わない場合は省略するか-1を設定します。
-    panel.pwm_ch_bl = -1;
-
-    // バックライト点灯時の出力レベルがローかハイかを設定します。
-    // 省略時は true。true=HIGHで点灯 / false=LOWで点灯になります。
-    panel.backlight_level = true;
-
-    // invertDisplayの初期値を設定します。trueを設定すると反転します。
-    // 省略時は false。画面の色が反転している場合は設定を変更してください。
-    panel.invert = false;
-
-    // パネルの色順がを設定します。  RGB=true / BGR=false
-    // 省略時はfalse。赤と青が入れ替わっている場合は設定を変更してください。
-    panel.rgb_order = false;
-
-    // パネルのメモリが持っているピクセル数（幅と高さ）を設定します。
-    // 設定が合っていない場合、setRotationを使用した際の座標がずれます。
-    // （例：ST7735は 132x162 / 128x160 / 132x132 の３通りが存在します）
-    panel.memory_width = ESP32_TSC_9488_LCD_WIDTH;
-    panel.memory_height = ESP32_TSC_9488_LCD_HEIGHT;
-
-    // パネルの実際のピクセル数（幅と高さ）を設定します。
-    // 省略時はパネルクラスのデフォルト値が使用されます。
-    panel.panel_width = ESP32_TSC_9488_LCD_WIDTH;
-    panel.panel_height = ESP32_TSC_9488_LCD_HEIGHT;
-
-    // パネルのオフセット量を設定します。
-    // 省略時はパネルクラスのデフォルト値が使用されます。
-    panel.offset_x = 0;
-    panel.offset_y = 0;
-
-    // setRotationの初期化直後の値を設定します。
-    panel.rotation = 0;
-
-    // setRotationを使用した時の向きを変更したい場合、offset_rotationを設定します。
-    // setRotation(0)での向きを 1の時の向きにしたい場合、 1を設定します。
-    panel.offset_rotation = 0;
-
-    // 設定を終えたら、LGFXのsetPanel関数でパネルのポインタを渡します。
     tft.setPanel(&panel);
 }
 
+//transform touch screen pos
 void pos_rotation(int pos[2], int rotation)
 {
     if (pos[0] == -1)
