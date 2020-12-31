@@ -2,10 +2,11 @@
 
 ```c++
 /*
-Version:		V3.3
+Version:		V3.4
 Author:			Vincent
 Create Date:	2020/8/19
 Note:
+	V3.4 : Thanks Lovyan03's change. Greatly speed up the rendering process.
 	V3.3 : Change UI direction.
 	V3.2 : Added the ability to upload photos to PC through WiFi. 
 	V3.1 : Replace the picture with the new hardware.
