@@ -1,33 +1,31 @@
-#include "SPI.h"
-#include "SD.h"
-#include "FS.h"
-#include "esp_camera.h"
+#include <SPI.h>
+#include <SD.h>
+#include <FS.h>
+#include <esp_camera.h>
+#include <HTTPClient.h>
+#include <LovyanGFX.hpp>
+
+#include "makerfabs_pin.h"
 #define CAMERA_MODEL_MAKERFABS
 #include "camera_pins.h"
-#include "HTTPClient.h"
-
-#include <LovyanGFX.hpp>
-#include "makerfabs_pin.h"
-
-//If undefine debug, will be faster
-//#define SERIAL_DEBUG
 //#define WIFI_MODE
 
 #define ARRAY_LENGTH 320 * 240 * 3
-
-//#define NS2009_TOUCH //Resistive screen driver
-#define FT6236_TOUCH //Capacitive screen driver
-
 #define SCRENN_ROTATION 3
+
+//#define NS2009_TOUCH  //Resistive screen driver
+#define FT6236_TOUCH    //Capacitive screen driver
 
 #ifdef NS2009_TOUCH
 #include "NS2009.h"
 const int i2c_touch_addr = NS2009_ADDR;
+#define get_pos ns2009_pos
 #endif
 
 #ifdef FT6236_TOUCH
 #include "FT6236.h"
 const int i2c_touch_addr = TOUCH_I2C_ADD;
+#define get_pos ft6236_pos
 #endif
 
 //SPI control
@@ -62,45 +60,23 @@ int stream_flag = 1;
 
 void setup()
 {
-
     esp32_init();
     camera_init();
 }
 
 void loop()
 {
-#ifdef SERIAL_DEBUG
-    unsigned long start = micros();
-#endif
-
     camera_fb_t *fb = NULL;
-
     fb = esp_camera_fb_get();
 
     if (stream_flag == 1)
     {
-#ifdef SERIAL_DEBUG
-        Serial.println(micros() - start);
-#endif
         //Display rgb565 picture
-        drawRGBBitmap(fb->buf, fb->width, fb->height);
-
-#ifdef SERIAL_DEBUG
-        Serial.println(micros() - start);
-#endif
+        //drawRGBBitmap(fb->buf, fb->width, fb->height);
+        tft.pushImage(0, 0, fb->width, fb->height, (lgfx::swap565_t *)fb->buf);
     }
 
-#ifdef NS2009_TOUCH
-    ns2009_pos(pos);
-#endif
-#ifdef FT6236_TOUCH
-    ft6236_pos(pos);
-#endif
-
-#ifdef SERIAL_DEBUG
-    String pos_str = (String)pos[0] + "," + (String)pos[1] + "," + (String)ns2009_get_press();
-    Serial.println(pos_str);
-#endif
+    get_pos(pos);
     pos_rotation(pos, SCRENN_ROTATION);
 
     if (320 < pos[0] && pos[0] < 480)
@@ -109,11 +85,6 @@ void loop()
         {
             if (stream_flag == 1)
             {
-
-#ifdef SERIAL_DEBUG
-                Serial.println("Take a photo");
-#endif
-
                 void *ptrVal = NULL;
                 ptrVal = heap_caps_malloc(ARRAY_LENGTH, MALLOC_CAP_SPIRAM);
                 uint8_t *rgb = (uint8_t *)ptrVal;
@@ -129,20 +100,12 @@ void loop()
             }
             else
             {
-
-#ifdef SERIAL_DEBUG
-                Serial.println("Please start steam");
-#endif
                 show_log(3);
             }
         }
 
         if (pos[1] > 80 && pos[1] < 160)
         {
-#ifdef SERIAL_DEBUG
-            Serial.println("Last photo:");
-            Serial.println(imgname);
-#endif
             show_log(1);
             stream_flag = 0;
             tft.fillRect(0, 0, 320, 240, TFT_BLACK);
@@ -156,34 +119,11 @@ void loop()
 
         if (pos[1] < 240 && pos[1] > 160)
         {
-#ifdef SERIAL_DEBUG
-            Serial.println("START STREAM");
-#endif
             stream_flag = 1;
             show_log(2);
         }
     }
-
-    /*
-    if (pos[0] < 320 && pos[0] > 220)
-    {
-        if (pos[1] < 480 && pos[1] > 440)
-        {
-#ifdef SERIAL_DEBUG
-            Serial.println("START STREAM");
-#endif
-            stream_flag = 0;
-            testFillScreen();
-        }
-    }
-    */
-
     esp_camera_fb_return(fb);
-
-#ifdef SERIAL_DEBUG
-    Serial.println(micros() - start);
-    Serial.println("over a circle");
-#endif
 }
 
 //ILI9488 init and SD card init
@@ -226,8 +166,6 @@ void esp32_init()
     {
         Serial.println("Card Mount Failed");
         SD_init_flag = 1;
-
-        //while (1);
     }
     else
     {
@@ -266,12 +204,7 @@ void esp32_init()
 
         while (1)
         {
-#ifdef NS2009_TOUCH
-            ns2009_pos(pos);
-#endif
-#ifdef FT6236_TOUCH
-            ft6236_pos(pos);
-#endif
+            get_pos(pos);
 
             if (pos[0] > 100 && pos[0] < 380 && pos[1] > 160 && pos[1] < 320)
                 break;
@@ -427,6 +360,7 @@ int print_img(fs::FS &fs, String filename)
     if (!f)
     {
         Serial.println("Failed to open file for reading");
+        f.close();
         return 0;
     }
 
@@ -460,6 +394,7 @@ int print_logo_img(fs::FS &fs, String filename)
     if (!f)
     {
         Serial.println("Failed to open file for reading");
+        f.close();
         return 0;
     }
     else
