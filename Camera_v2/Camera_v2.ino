@@ -13,6 +13,13 @@
 #define ARRAY_LENGTH 320 * 240 * 3
 #define SCRENN_ROTATION 3
 
+/*
+!!!MAKE SURE CHOICE RIGHT TOUCH SCREEN DRIVER!!!
+
+You can only use one type:Resistive or Capacitive.
+
+!!!MAKE SURE CHOICE RIGHT TOUCH SCREEN DRIVER!!!
+*/
 //#define NS2009_TOUCH  //Resistive screen driver
 #define FT6236_TOUCH //Capacitive screen driver
 
