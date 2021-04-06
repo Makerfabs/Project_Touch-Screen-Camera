@@ -2,10 +2,11 @@
 
 ```c++
 /*
-Version:		V3.4
+Version:		V4.0
 Author:			Vincent
 Create Date:	2020/8/19
 Note:
+	V4.0 : Add 4 show example.
 	V3.4 : Thanks Lovyan03's change. Greatly speed up the rendering process.
 	V3.3 : Change UI direction.
 	V3.2 : Added the ability to upload photos to PC through WiFi. 
@@ -232,6 +233,17 @@ WiFi.begin("Makerfabs", "20160704");
 - V3.3  :  The UI has changed, but the functionality remains the same.
 
 ![new_ui](md_pic/new_ui.jpg)
+
+
+
+## V4.0 Show Example
+
+Add 4 example in /Project_Touch-Screen-Camra/example
+
+- Aht10 show
+- HCSR04 meter
+- Web button
+- Wind speed show
 
 
 
