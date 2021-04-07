@@ -245,7 +245,38 @@ Add 4 example in /Project_Touch-Screen-Camra/example
 - Web button
 - Wind speed show
 
+These examples depend on TFT_eSPI library. You must set "User_Setup.h".
+Set screen type.
 
+```c++
+// Only define one driver, the other ones must be commented out
+//#define ILI9341_DRIVER
+//#define ST7735_DRIVER      // Define additional parameters below for this display
+//#define ILI9163_DRIVER     // Define additional parameters below for this display
+//#define S6D02A1_DRIVER
+//#define RPI_ILI9486_DRIVER // 20MHz maximum SPI
+//#define HX8357D_DRIVER
+//#define ILI9481_DRIVER
+//#define ILI9486_DRIVER
+#define ILI9488_DRIVER     // WARNING: Do not connect ILI9488 display SDO to MISO if other devices share the SPI bus (TFT SDO does NOT tristate when CS is high)
+//#define ST7789_DRIVER      // Full configuration option, define additional parameters below for this display
+//#define ST7789_2_DRIVER    // Minimal configuration option, define additional parameters below for this display
+```
+And set pins.
+
+```c++
+// For 3.5" 9488
+// The hardware SPI can be mapped to any pins
+
+#define TFT_MISO 12
+#define TFT_MOSI 13
+#define TFT_SCLK 14
+#define TFT_CS   15  // Chip select control pin
+#define TFT_DC    33  // Data Command control pin
+#define TFT_RST   26  // Reset pin (could connect to RST pin)
+    
+
+```
 
 ## FAQ
 
