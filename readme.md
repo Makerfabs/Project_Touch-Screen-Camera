@@ -6,6 +6,7 @@ Version:		V4.0
 Author:			Vincent
 Create Date:	2020/8/19
 Note:
+	V4.1 : Add 1 show example.
 	V4.0 : Add 4 show example.
 	V3.4 : Thanks Lovyan03's change. Greatly speed up the rendering process.
 	V3.3 : Change UI direction.
@@ -277,6 +278,16 @@ And set pins.
     
 
 ```
+
+## V4.1 Show Example
+
+Add environment monitoring module demo.
+
+- Line chart
+
+![](md_pic/linechart1.jpg)
+
+![](md_pic/linechart2.jpg)
 
 ## FAQ
 
