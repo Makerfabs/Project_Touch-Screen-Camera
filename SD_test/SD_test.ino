@@ -25,7 +25,7 @@ void setup()
     Serial.begin(115200);
 
     //CLOSE LCD SPI
-    digitalWrite(LCD_CS, HIGH)
+    digitalWrite(LCD_CS, HIGH);
 
     //SPI init
     pinMode(SD_CS, OUTPUT);
