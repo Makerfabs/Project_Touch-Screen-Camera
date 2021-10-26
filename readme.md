@@ -6,6 +6,7 @@ Version:		V5.0
 Author:			Vincent
 Create Date:	2020/8/19
 Note:
+	V6.0 : Add WiFi bulletin board demo
 	V5.0 : Add Environment Expansion Board
 	V4.1 : Add 1 show example.
 	V4.0 : Add 4 show example.
@@ -289,6 +290,29 @@ Add environment monitoring module demo.
 ![](md_pic/linechart1.jpg)
 
 ![](md_pic/linechart2.jpg)
+
+## V6.0 WiFi bulletin board Demo
+
+Added a WiFi bulletin board app. You can upload and browse files in the SD card through the web page. And the latest uploaded BMP or TXT display on the 3.5-inch screen.
+
+- Library Install：[esp32-micro-sdcard](https://github.com/nhatuan84/esp32-micro-sdcard) and [esp32-webserver](https://github.com/nhatuan84/esp32-webserver)
+- Upload .\example\wifi_img\wifi_img.ino
+- Insert the SD card and power on.
+- Enter the IP address on the screen in your browser.
+
+![](md_pic/wifi_img1.jpg)
+
+- Select TXT or BMP to be uploaded. BMP must be 480 x 320 pixels, 24 bits.
+
+![](md_pic/wifi_img2.jpg)
+
+- Upload.
+- Wait seconds, the content is displayed on the screen.
+
+![](md_pic/wifi_img3.jpg)
+
+
+
 
 ## FAQ
 
