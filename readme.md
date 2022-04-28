@@ -142,6 +142,7 @@ Change from [MakePython ESP32 Color LCD で 動画をWiFi受信](https://homemad
 **If you have any questions，such as how to install the development board, how to download the code, how to install the library. Please refer to :[Makerfabs_FAQ](https://github.com/Makerfabs/Makerfabs_FAQ)**
 
 - Install board : ESP32 , select ESP32 version 1.0.6!!!!!!! After 2.0.0 version can't run successfully.
+- **2022/4/28 Add：I don't know which libraries I updated, 1.0.6 compiles but doesn't drive the camera properly, rolling back the ESP32 version to 1.0.5 works fine.**
 - Install library : LovyanGFX library. (SD2TFT is use a different GFX lib, depend on Adafruit_GFX. )
 - Edit the code based on the touch screen. If you use resistive screen, choice NS2009_TOUCH. If you use capacitive screen, choice FT6236_TOUCH.
 
