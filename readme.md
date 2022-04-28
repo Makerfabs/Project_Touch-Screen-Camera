@@ -2,10 +2,11 @@
 
 ```c++
 /*
-Version:		V5.0
+Version:		V6.1
 Author:			Vincent
 Create Date:	2020/8/19
 Note:
+	V6.1 : Update firmware add camera config faq.
 	V6.0 : Add WiFi bulletin board demo
 	V5.0 : Add Environment Expansion Board
 	V4.1 : Add 1 show example.
@@ -140,7 +141,7 @@ Change from [MakePython ESP32 Color LCD で 動画をWiFi受信](https://homemad
 
 **If you have any questions，such as how to install the development board, how to download the code, how to install the library. Please refer to :[Makerfabs_FAQ](https://github.com/Makerfabs/Makerfabs_FAQ)**
 
-- Install board : ESP32 .
+- Install board : ESP32 , select ESP32 version 1.0.6!!!!!!! After 2.0.0 version can't run successfully.
 - Install library : LovyanGFX library. (SD2TFT is use a different GFX lib, depend on Adafruit_GFX. )
 - Edit the code based on the touch screen. If you use resistive screen, choice NS2009_TOUCH. If you use capacitive screen, choice FT6236_TOUCH.
 
@@ -331,3 +332,37 @@ A: It may be that after shooting, the SD card was not in good contact, so it cou
 ### Q: Other questions...
 
 A: Re-insert the SD card and restart it. Can solve most problems. (laugh)
+
+
+
+### Q: Camera direction wrong
+
+A: Depending on the batch of purchased cameras, the picture may be inverted. You can configure the following functions.
+
+Change set_vflip() param to flip camera or set_hmirror() to mirror image.
+
+```c++
+// Camera setting
+void camera_init()
+{
+    // camera config
+    
+    //...
+
+    sensor_t *s = esp_camera_sensor_get();
+    // initial sensors are flipped vertically and colors are a bit saturated
+    if (s->id.PID == OV2640_PID)
+    {
+        s->set_vflip(s, 0);   // vertical flip
+        s->set_hmirror(s, 0); // Horizontal mirror
+
+        s->set_brightness(s, 0); // up the blightness just a bit
+        s->set_saturation(s, 1); // lower the saturation
+    }
+    // drop down frame size for higher initial frame rate
+    s->set_framesize(s, FRAMESIZE_QVGA);
+
+    show_log(2);
+}
+```
+

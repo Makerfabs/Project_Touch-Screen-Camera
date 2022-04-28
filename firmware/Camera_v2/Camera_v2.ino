@@ -20,8 +20,8 @@ You can only use one type:Resistive or Capacitive.
 
 !!!MAKE SURE CHOICE RIGHT TOUCH SCREEN DRIVER!!!
 */
-//#define NS2009_TOUCH  //Resistive screen driver
-#define FT6236_TOUCH //Capacitive screen driver
+// #define NS2009_TOUCH  //Resistive screen driver
+#define FT6236_TOUCH // Capacitive screen driver
 
 #ifdef NS2009_TOUCH
 #include "NS2009.h"
@@ -35,7 +35,7 @@ const int i2c_touch_addr = TOUCH_I2C_ADD;
 #define get_pos ft6236_pos
 #endif
 
-//SPI control
+// SPI control
 #define SPI_ON_TFT digitalWrite(ESP32_TSC_9488_LCD_CS, LOW)
 #define SPI_OFF_TFT digitalWrite(ESP32_TSC_9488_LCD_CS, HIGH)
 #define SPI_ON_SD digitalWrite(ESP32_TSC_9488_SD_CS, LOW)
@@ -131,14 +131,14 @@ void loop()
     esp_camera_fb_return(fb);
 }
 
-//ILI9488 init and SD card init
+// ILI9488 init and SD card init
 void esp32_init()
 {
     int SD_init_flag = 0;
     Serial.begin(115200);
     Serial.println("ILI9488 Test!");
 
-    //I2C init
+    // I2C init
     Wire.begin(ESP32_TSC_9488_I2C_SDA, ESP32_TSC_9488_I2C_SCL);
     byte error, address;
 
@@ -157,7 +157,7 @@ void esp32_init()
         Serial.println(i2c_touch_addr, HEX);
     }
 
-    //SPI init
+    // SPI init
     pinMode(ESP32_TSC_9488_SD_CS, OUTPUT);
     pinMode(ESP32_TSC_9488_LCD_CS, OUTPUT);
     SPI_OFF_SD;
@@ -165,7 +165,7 @@ void esp32_init()
 
     SPI.begin(ESP32_TSC_9488_HSPI_SCK, ESP32_TSC_9488_HSPI_MISO, ESP32_TSC_9488_HSPI_MOSI);
 
-    //SD(SPI) init
+    // SD(SPI) init
     SPI_ON_SD;
     if (!SD.begin(ESP32_TSC_9488_SD_CS, SPI, 40000000))
     {
@@ -180,14 +180,23 @@ void esp32_init()
 
     Serial.println("SD init over.");
 
-    //TFT(SPI) init
+    // TFT(SPI) init
     SPI_ON_TFT;
     set_tft();
     tft.begin();
     tft.setRotation(SCRENN_ROTATION);
+    tft.fillScreen(TFT_RED);
+    delay(1500);
+    tft.fillScreen(TFT_GREEN);
+    delay(1500);
+    tft.fillScreen(TFT_WHITE);
+    delay(1500);
+    tft.fillScreen(TFT_BLUE);
+    delay(1500);
     tft.fillScreen(TFT_BLACK);
+    delay(1500);
 
-    //if SD init failed
+    // if SD init failed
     if (SD_init_flag == 1)
     {
         tft.setTextColor(TFT_RED);
@@ -257,10 +266,10 @@ void esp32_init()
 #endif
 }
 
-//Camera setting
+// Camera setting
 void camera_init()
 {
-    //camera config
+    // camera config
     camera_config_t config;
     config.ledc_channel = LEDC_CHANNEL_0;
     config.ledc_timer = LEDC_TIMER_0;
@@ -297,20 +306,22 @@ void camera_init()
     }
 
     sensor_t *s = esp_camera_sensor_get();
-    //initial sensors are flipped vertically and colors are a bit saturated
+    // initial sensors are flipped vertically and colors are a bit saturated
     if (s->id.PID == OV2640_PID)
     {
-        s->set_vflip(s, 1);      //flip it back
-        s->set_brightness(s, 0); //up the blightness just a bit
-        s->set_saturation(s, 1); //lower the saturation
+        s->set_vflip(s, 0);   // vertical flip
+        s->set_hmirror(s, 0); // Horizontal mirror
+
+        s->set_brightness(s, 0); // up the blightness just a bit
+        s->set_saturation(s, 1); // lower the saturation
     }
-    //drop down frame size for higher initial frame rate
+    // drop down frame size for higher initial frame rate
     s->set_framesize(s, FRAMESIZE_QVGA);
 
     show_log(2);
 }
 
-//Save image to SD card
+// Save image to SD card
 int save_image(fs::FS &fs, uint8_t *rgb)
 {
     SPI_ON_SD;
@@ -354,7 +365,7 @@ void draw_button()
     SPI_OFF_TFT;
 }
 
-//Display image from file
+// Display image from file
 int print_img(fs::FS &fs, String filename, int x, int y)
 {
     SPI_ON_SD;
@@ -491,7 +502,7 @@ void set_tft()
     tft.setPanel(&panel);
 }
 
-//transform touch screen pos
+// transform touch screen pos
 void pos_rotation(int pos[2], int rotation)
 {
     if (pos[0] == -1)
