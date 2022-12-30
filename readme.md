@@ -1,11 +1,12 @@
-# Touch Screen Camera
+# ESP32 3.5" TFT Touch with Camera
 
 ```c++
 /*
-Version:		V6.1
+Version:		V6.2
 Author:			Vincent
 Create Date:	2020/8/19
 Note:
+	V6.2 : Change Wiki link.
 	V6.1 : Update firmware add camera config faq.
 	V6.0 : Add WiFi bulletin board demo
 	V5.0 : Add Environment Expansion Board
@@ -27,42 +28,21 @@ Note:
 
 [toc]
 
-# OVERVIEW
-
-## Introduce
+# Makerfabs
 
 [Makerfabs home page](https://www.makerfabs.com/)
 
-[Makerfabs Wiki](https://makerfabs.com/wiki/index.php?title=Main_Page)
+[Makerfabs Wiki](https://wiki.makerfabs.com/)
 
-The realization of a simple digital camera, you can take pictures through the camera framing. It is displayed on the TFT screen and provides touch options. Photos taken can be saved on an SD card.
+# ESP32 3.5" TFT Touch with Camera
 
-## Equipment list
+## Introduce
 
-- ESP32 Touch Camera
-- Micro SD card
+Product link ：[ ESP32 Touch Camera(Resistive)](https://www.makerfabs.com/esp32-3.5-inch-tft-touch-resistive-with-camera.html) 
 
-## Related projects
+Product link ：[ ESP32 Touch Camera(Capacitive)](https://www.makerfabs.com/esp32-3.5-inch-tft-touch-capacitive-with-camera.html) 
 
-[ESP32 2048 GAME](https://github.com/Makerfabs/Project_ESP32-2048GAME)
-
-Implement a 2048 game on "ESP32 Touch Camera". 
-
-![2048](md_pic/2048.gif)
-
-[ESP32 Flappy Bird](https://github.com/Makerfabs/Project_ESP32-Flappy-Bird)
-
-Implement a Flappy Bird game on "ESP32 Touch Camera". 
-
-![Flappy](md_pic/Flappy.gif)
-
-
-
-# ESP32 Touch Camera
-
-## Product link ：[ ESP32 Touch Camera(Resistive)](https://www.makerfabs.com/esp32-3.5-inch-tft-touch-resistive-with-camera.html) 
-
-## Product link ：[ ESP32 Touch Camera(Capacitive)](https://www.makerfabs.com/esp32-3.5-inch-tft-touch-capacitive-with-camera.html) 
+Wiki link ：[ESP32 3.5" TFT Touch with Camera](https://wiki.makerfabs.com/ESP32_3.5_TFT_Touch_with_Camera.html) 
 
 The ESP32 Touch Camera use ILI9488 screen, which comes with resistive or capacitive screens. Have an OV2640 camera and SD card slot. It can be used as a webcam, an electronic album, or a digital camera. Support for Arduino and MicroPython. 
 
@@ -78,16 +58,26 @@ The ESP32 Touch Camera use ILI9488 screen, which comes with resistive or capacit
 - The FT6X36 Series ICs are single-chip capacitive touch panel controller IC with a built-in 16 bit enhanced Micro-controller unit (MCU).
 
 
-
-
-
 ![front](md_pic/front.jpg)
 
 ![back](md_pic/back.jpg)
 
-
-
 # Project
+
+## Related projects
+
+[ESP32 2048 GAME](https://github.com/Makerfabs/Project_ESP32-2048GAME)
+
+Implement a 2048 game on "ESP32 Touch Camera". 
+
+![2048](md_pic/2048.gif)
+
+[ESP32 Flappy Bird](https://github.com/Makerfabs/Project_ESP32-Flappy-Bird)
+
+Implement a Flappy Bird game on "ESP32 Touch Camera". 
+
+![Flappy](md_pic/Flappy.gif)
+
 
 ## Project introduction
 
