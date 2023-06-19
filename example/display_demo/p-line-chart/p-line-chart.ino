@@ -41,7 +41,7 @@ void setup()
     delay(1000);
     BUZZER_OFF;
 
-    Wire.begin(I2C_SDA, I2C_SCL);
+    Wire.begin(I2C_SDA,I2C_SCL);
 
     Serial.println("SGP30 test");
 

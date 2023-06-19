@@ -256,6 +256,22 @@ Set screen type.
 #define ILI9488_DRIVER     // WARNING: Do not connect ILI9488 display SDO to MISO if other devices share the SPI bus (TFT SDO does NOT tristate when CS is high)
 //#define ST7789_DRIVER      // Full configuration option, define additional parameters below for this display
 //#define ST7789_2_DRIVER    // Minimal configuration option, define additional parameters below for this display
+
+// For ST7789, ST7735, ILI9163 and GC9A01 ONLY, define the pixel width and height in portrait orientation
+// #define TFT_WIDTH  80
+// #define TFT_WIDTH  128
+// #define TFT_WIDTH  172 // ST7789 172 x 320
+//#define TFT_WIDTH  240 // ST7789 240 x 240 and 240 x 320
+#define TFT_WIDTH  320
+// #define TFT_HEIGHT 160
+// #define TFT_HEIGHT 128
+// #define TFT_HEIGHT 240 // ST7789 240 x 240
+// #define TFT_HEIGHT 320 // ST7789 240 x 320
+//#define TFT_HEIGHT 240 // GC9A01 240 x 240
+#define TFT_HEIGHT 480
+
+
+
 ```
 And set pins.
 
